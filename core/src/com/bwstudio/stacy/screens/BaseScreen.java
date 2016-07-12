@@ -19,6 +19,6 @@ public abstract class BaseScreen implements Screen {
 		this.prevScreen = prevScreen;
 		this.stage = new Stage();
 		Gdx.input.setInputProcessor(stage);
-		stage.setViewport(new FitViewport(Constants.V_WIDTH, Constants.V_HEIGHT));
+		stage.setViewport(new FitViewport(Constants.V_WIDTH, Constants.V_HEIGHT, game.cam));
 	}
 }

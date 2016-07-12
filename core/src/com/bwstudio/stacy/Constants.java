@@ -8,4 +8,7 @@ public class Constants {
 	public static float V_WIDTH = 800f;
 	public static float V_HEIGHT = 600f;
 	
+	// Pixel Per Meter
+	public static float PPM = 100f;
+	
 }
