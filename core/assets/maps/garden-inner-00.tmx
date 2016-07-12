@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="20" height="8" tilewidth="32" tileheight="32" nextobjectid="7">
+ <tileset firstgid="1" name="garden-inner" tilewidth="32" tileheight="32" tilecount="30" columns="6">
+  <image source="garden-inner.png" width="192" height="160"/>
+ </tileset>
+ <tileset firstgid="31" name="garden-env" tilewidth="32" tileheight="32" tilecount="1" columns="1">
+  <image source="garden-env.png" width="32" height="32"/>
+ </tileset>
+ <layer name="map" width="20" height="8">
+  <data encoding="csv">
+18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,
+18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,
+1,9,9,9,9,9,9,9,9,2,18,18,18,18,18,18,18,18,18,18,
+3,13,14,14,14,14,14,14,15,11,9,9,9,9,9,9,9,9,9,9,
+3,19,20,20,20,20,20,20,22,14,14,14,14,14,14,14,14,14,14,14,
+3,25,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,
+7,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,
+18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18
+</data>
+ </layer>
+ <layer name="environment" width="20" height="8">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,31,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <objectgroup name="collisions">
+  <object id="6" x="640" y="128">
+   <polyline points="0,0 -352,0 -352,-32 -608,-32 -608,64 0,64"/>
+  </object>
+ </objectgroup>
+</map>

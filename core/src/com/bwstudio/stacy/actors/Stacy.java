@@ -20,11 +20,12 @@ public class Stacy extends BaseActor {
 	
 	public Stacy(Texture texture) {
 		super(texture);
+		setSize(getWidth() / 2f, getHeight() / 2f);
 		setOrigin(getOriginX() + getWidth()/2f, getOriginY() + getHeight() / 2f);
 		
 		isJumping = false;
 		jumpTime = maxJumpTime = 0.3f;
-		jumpHeight = 450f;
+		jumpHeight = 225f;
 	}
 	
 	public void update(float delta) {
@@ -35,13 +36,13 @@ public class Stacy extends BaseActor {
 	
 	private void handleInput(float delta) {
 		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-			body.setTransform(body.getTransform().getPosition().x - 5 / Constants.PPM, body.getTransform().getPosition().y, 0);
+			body.setTransform(body.getTransform().getPosition().x - 2.5f / Constants.PPM, body.getTransform().getPosition().y, 0);
 			body.setAwake(true);
 			setScaleX(-1);
 		}
 		
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			body.setTransform(body.getTransform().getPosition().x + 5 / Constants.PPM, body.getTransform().getPosition().y, 0);
+			body.setTransform(body.getTransform().getPosition().x + 2.5f / Constants.PPM, body.getTransform().getPosition().y, 0);
 			body.setAwake(true);
 			setScaleX(1);
 		}
@@ -68,7 +69,7 @@ public class Stacy extends BaseActor {
 		body = world.createBody(bdef);
 		
 		PolygonShape shape = new PolygonShape();
-		shape.setAsBox(getWidth() / 2f / Constants.PPM, getHeight() / 2f / Constants.PPM);
+		shape.setAsBox(getWidth() / 2f / Constants.PPM, (getHeight() / 2f - 1) / Constants.PPM);
 		
 		FixtureDef fdef = new FixtureDef();
 		fdef.shape = shape;

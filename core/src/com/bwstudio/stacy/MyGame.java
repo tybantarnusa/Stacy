@@ -5,7 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.bwstudio.stacy.screens.LevelScreen;
+import com.bwstudio.stacy.screens.LevelGardenScreen;
 
 public class MyGame extends Game {
 	public SpriteBatch batch;
@@ -15,7 +15,7 @@ public class MyGame extends Game {
 	public void create () {
 		batch = new SpriteBatch();
 		cam = new OrthographicCamera(Constants.V_WIDTH, Constants.V_HEIGHT);
-		setScreen(new LevelScreen(this, null));
+		setScreen(new LevelGardenScreen(this, null));
 		
 	}
 
