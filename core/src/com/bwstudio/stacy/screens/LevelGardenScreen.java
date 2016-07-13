@@ -4,8 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -69,9 +67,7 @@ public class LevelGardenScreen extends BaseScreen {
 		b2dr = new Box2DDebugRenderer();
 		
 		// Create entities
-		Texture texture = new Texture("stacy.png");
-		texture.setFilter(TextureFilter.Linear, TextureFilter.Nearest);
-		stacy = new Stacy(texture);
+		stacy = new Stacy();
 		stacy.setPosition(50, game.cam.position.y + 96);
 		stacy.createPhysics(world);
 		
@@ -205,7 +201,7 @@ public class LevelGardenScreen extends BaseScreen {
 		hud.draw();
 		game.batch.end();
 		
-		b2dr.render(world, game.batch.getProjectionMatrix().cpy().scale(Constants.PPM, Constants.PPM, 0));
+//		b2dr.render(world, game.batch.getProjectionMatrix().cpy().scale(Constants.PPM, Constants.PPM, 0));
 		
 		world.step(1/60f, 6, 2);
 	}
@@ -221,8 +217,8 @@ public class LevelGardenScreen extends BaseScreen {
 			stacy.update(delta);
 		
 		// Camera follows main character
-		float offset = stacy.getScaleX() < 0 ? -0.75f : 0.75f;
-		float targetPosX = (stacy.getBody().getTransform().getPosition().x  + offset) * Constants.PPM;
+		float offset = stacy.isFacingRight() ? 0.75f : -0.75f;
+		float targetPosX = (stacy.getBody().getTransform().getPosition().x + offset) * Constants.PPM;
 		targetPosX = MathUtils.clamp(targetPosX, game.cam.viewportWidth / 4f, map.getProperties().get("width", Integer.class) * map.getProperties().get("tilewidth", Integer.class) - game.cam.viewportWidth / 4f);
 		game.cam.position.x = (game.cam.position.x + (targetPosX - game.cam.position.x) * 0.03f);
 		game.cam.position.y = MathUtils.clamp(game.cam.position.y, game.cam.viewportHeight / 4f - 32, Integer.MAX_VALUE);
@@ -231,7 +227,7 @@ public class LevelGardenScreen extends BaseScreen {
 		Gdx.graphics.setTitle(Constants.TITLE + " | FPS: " + Gdx.graphics.getFramesPerSecond());
 		
 		// Textbox writer
-		writeTextBox(new String[] {Strings.DEMO, Strings.NEW_GAME, Strings.LIPSUM, Strings.DEMO, Strings.LIPSUM});
+		writeTextBox(new String[] {"Ntaps, udah bisa animasi."});
 		
 		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
 			showTextBox();
