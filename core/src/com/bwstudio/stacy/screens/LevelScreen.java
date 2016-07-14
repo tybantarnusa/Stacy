@@ -92,7 +92,7 @@ public class LevelScreen extends BaseScreen {
 		table.add(textbox).expandX().align(Align.topLeft);
 
 		hud.addActor(table);
-//		hud.addActor(label);
+		hud.addActor(label);
 		
 		// Initialize camera position
 		float offset = stacy.isFacingRight() ? 0.75f : -0.75f;
@@ -103,6 +103,7 @@ public class LevelScreen extends BaseScreen {
 	
 	private void showTextBox() {
 		if (interactionState == InteractionState.GAMEPLAY) {
+			stacy.setIdle();
 			textboxBuffersIndex = 0;
 			interactionState = InteractionState.INIT_TEXTBOX;
 		}

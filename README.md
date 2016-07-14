@@ -1,10 +1,10 @@
 # STACY
-Stacy is a __metroidvania__ game which is developed for __Indie Game Ignite__ competition hosted by __CompFest 8__.
+Stacy is a __metroidvania__ game which is developed for the __Indie Game Ignite__ competition hosted by __CompFest 8__.
 
 <center>![gameplay](http://imgh.us/001_3.gif)</center>
 
 ### Storyline
-A rich family suddenly *missing* because of a curse. It is said that the family got their money and properties because they worked with a witch. Because of that, the whole family is missing right now. The curse made the *porcellain dolls* in their house alive. A *porcellain doll* started her *adventure* to find the missing family.
+A rich family suddenly went *missing* because of a curse. It is said that the family got their money and properties because they worked with a witch. Because of that, the whole family is missing right now. The curse made the *porcellain dolls* in their house alive. A *porcellain doll* started her *adventure* to find the missing family.
 
 ### Gameplay
 * 2D platformer.

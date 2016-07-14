@@ -29,7 +29,21 @@ public class Stacy extends BaseActor {
 	private float timePassed;
 	private Animation idleAnimationR;
 	private Animation idleAnimationL;
+	private Animation startRunAnimationR;
+	private Animation startRunAnimationL;
+	private Animation runAnimationR;
+	private Animation runAnimationL;
 	private Animation currentAnimation;
+	
+	// States
+	private enum State {
+		IDLE,
+		INIT_RUN,
+		RUN,
+		STOP_RUN,
+		JUMP
+	}
+	private State state;
 	
 	public Stacy() {
 		super();
@@ -41,10 +55,15 @@ public class Stacy extends BaseActor {
 		jumpHeight = 225f;
 		
 		facingRight = true;
-		walkingSpeed = 2f;
+		walkingSpeed = 1.65f;
+		
+		state = State.IDLE;
+		
 		
 		// Initiate animations
 		timePassed = 0;
+		
+		// Idle
 		Texture texture = new Texture("chars/stacy/stacy_stand.png");
 		texture.setFilter(TextureFilter.Linear, TextureFilter.Nearest);
 		TextureRegion[] frames = new TextureRegion(texture).split(36, 39)[0];
@@ -56,40 +75,97 @@ public class Stacy extends BaseActor {
 		idleAnimationR.setPlayMode(PlayMode.LOOP);
 		idleAnimationL = new Animation(0.1f, mirror);
 		idleAnimationL.setPlayMode(PlayMode.LOOP);
+		
+		// Start Run
+		texture = new Texture("chars/stacy/stacy_start_run.png");
+		texture.setFilter(TextureFilter.Linear, TextureFilter.Nearest);
+		frames = new TextureRegion(texture).split(36, 39)[0];
+		mirror = new TextureRegion(texture).split(36, 39)[0];
+		for(TextureRegion m : mirror) {
+			m.flip(true, false);
+		}
+		startRunAnimationR = new Animation(0.1f, frames);
+		startRunAnimationR.setPlayMode(PlayMode.NORMAL);
+		startRunAnimationL = new Animation(0.1f, mirror);
+		startRunAnimationL.setPlayMode(PlayMode.NORMAL);
+		
+		// Run
+		texture = new Texture("chars/stacy/stacy_run.png");
+		texture.setFilter(TextureFilter.Linear, TextureFilter.Nearest);
+		frames = new TextureRegion(texture).split(36, 39)[0];
+		mirror = new TextureRegion(texture).split(36, 39)[0];
+		for(TextureRegion m : mirror) {
+			m.flip(true, false);
+		}
+		runAnimationR = new Animation(0.07f, frames);
+		runAnimationR.setPlayMode(PlayMode.LOOP);
+		runAnimationL = new Animation(0.07f, mirror);
+		runAnimationL.setPlayMode(PlayMode.LOOP);
+		
 		currentAnimation = idleAnimationR;
 		setBounds(0, 0, 32, 39);
 		setSize(32, 39);
 	}
 	
 	public void update(float delta) {
+		// Move
 		setPosition(body.getPosition().x * Constants.PPM - getWidth() / 2f, body.getPosition().y * Constants.PPM - getHeight() / 2f);
 		
+		// Input
 		handleInput(delta);
 		
-		System.out.println((getX() + getWidth() / 2f) + ", " + (getY() + getHeight() / 2f));
+		// Animation
+	    if (state == State.INIT_RUN && currentAnimation.isAnimationFinished(timePassed)) {
+			state = State.RUN;
+			currentAnimation = facingRight ? runAnimationR : runAnimationL;
+		}
+		
+		// debug position
+//		System.out.println((getX() + getWidth() / 2f) + ", " + (getY() + getHeight() / 2f));
 	}
 	
 	private void handleInput(float delta) {
-//		if (!Gdx.input.isKeyPressed(Input.Keys.LEFT) && !Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+		if (!Gdx.input.isKeyPressed(Input.Keys.LEFT) && !Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+			state = State.IDLE;
 			if (facingRight) {
 				currentAnimation = idleAnimationR;
 			} else {
 				currentAnimation = idleAnimationL;
 			}
-//		}
-		
-		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-			body.setTransform(body.getTransform().getPosition().x - walkingSpeed / Constants.PPM, body.getTransform().getPosition().y, 0);
-			body.setAwake(true);
-			faceLeft();
 		}
 		
-		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			body.setTransform(body.getTransform().getPosition().x + walkingSpeed / Constants.PPM, body.getTransform().getPosition().y, 0);
-			body.setAwake(true);
-			faceRight();
+		if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+			state = State.INIT_RUN;
+			currentAnimation = facingRight ? startRunAnimationR : startRunAnimationL;
 		}
 		
+		if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+			
+			setIdle();
+		
+		} else {
+		
+			if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+				body.setTransform(body.getTransform().getPosition().x - walkingSpeed / Constants.PPM, body.getTransform().getPosition().y, 0);
+				body.setAwake(true);
+				faceLeft();
+				
+				if (state != State.INIT_RUN) {
+					currentAnimation = runAnimationL;
+				}
+			}
+			
+			if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+				body.setTransform(body.getTransform().getPosition().x + walkingSpeed / Constants.PPM, body.getTransform().getPosition().y, 0);
+				body.setAwake(true);
+				faceRight();
+				
+				if (state != State.INIT_RUN) {
+					currentAnimation = runAnimationR;
+				}
+			}
+		
+		}
 		if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
 			jumpTime = maxJumpTime;
 		}
@@ -105,11 +181,11 @@ public class Stacy extends BaseActor {
 		
 	}
 	
-	@Override 
-	public void act(float deltaTime) {
-	    super.act(deltaTime);
-	    timePassed += deltaTime;
-	}
+	@Override
+	public void act(float delta) {
+		super.act(delta);
+	    timePassed += delta;
+	};
 	
 	@Override
 	public void draw(Batch batch, float ParentAlpha){
@@ -149,5 +225,10 @@ public class Stacy extends BaseActor {
 	
 	public void faceLeft() {
 		facingRight = false;
+	}
+	
+	public void setIdle() {
+		state = State.IDLE;
+		currentAnimation = facingRight ? idleAnimationR : idleAnimationL;
 	}
 }
