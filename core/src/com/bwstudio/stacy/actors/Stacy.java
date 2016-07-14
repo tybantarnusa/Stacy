@@ -65,6 +65,8 @@ public class Stacy extends BaseActor {
 		setPosition(body.getPosition().x * Constants.PPM - getWidth() / 2f, body.getPosition().y * Constants.PPM - getHeight() / 2f);
 		
 		handleInput(delta);
+		
+		System.out.println((getX() + getWidth() / 2f) + ", " + (getY() + getHeight() / 2f));
 	}
 	
 	private void handleInput(float delta) {
@@ -79,13 +81,13 @@ public class Stacy extends BaseActor {
 		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
 			body.setTransform(body.getTransform().getPosition().x - walkingSpeed / Constants.PPM, body.getTransform().getPosition().y, 0);
 			body.setAwake(true);
-			facingRight = false;
+			faceLeft();
 		}
 		
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
 			body.setTransform(body.getTransform().getPosition().x + walkingSpeed / Constants.PPM, body.getTransform().getPosition().y, 0);
 			body.setAwake(true);
-			facingRight = true;
+			faceRight();
 		}
 		
 		if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
@@ -139,5 +141,13 @@ public class Stacy extends BaseActor {
 	
 	public boolean isFacingRight() {
 		return facingRight;
+	}
+	
+	public void faceRight() {
+		facingRight = true;
+	}
+	
+	public void faceLeft() {
+		facingRight = false;
 	}
 }

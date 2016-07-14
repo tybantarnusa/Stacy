@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -20,11 +19,13 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.bwstudio.stacy.Constants;
 import com.bwstudio.stacy.MyGame;
-import com.bwstudio.stacy.Strings;
 import com.bwstudio.stacy.TiledObjectUtil;
 import com.bwstudio.stacy.actors.Stacy;
+import com.bwstudio.stacy.levels.Level;
 
-public class LevelGardenScreen extends BaseScreen {
+public class LevelScreen extends BaseScreen {
+	
+	private Level level;
 	
 	private Stacy stacy;
 	private World world;
@@ -51,31 +52,30 @@ public class LevelGardenScreen extends BaseScreen {
 		HIDE_TEXTBOX
 	}
 	
-	public LevelGardenScreen(final MyGame game, BaseScreen prevScreen) {
+	public LevelScreen(final MyGame game, BaseScreen prevScreen, boolean fromLeft, Level level) {
 		super(game, prevScreen);
 		
-		Strings.buildLanguage();
+		this.level = level;
 		
 		// Initial interaction state
 		interactionState = InteractionState.GAMEPLAY;
-		
-		// Initial camera position
-		game.cam.position.x = game.cam.viewportWidth / 4f;
 		
 		// Create Box2D world
 		world = new World(new Vector2(0, -9.8f), true);
 		b2dr = new Box2DDebugRenderer();
 		
-		// Create entities
+		// Create main character
+		Vector2 startingPosition = level.instance().getStartingPosition(fromLeft);
 		stacy = new Stacy();
-		stacy.setPosition(50, game.cam.position.y + 96);
+		stacy.setPosition(startingPosition.x, startingPosition.y);
 		stacy.createPhysics(world);
+		if (fromLeft) stacy.faceRight(); else stacy.faceLeft();
 		
 		// Add entities to stage
 		stage.addActor(stacy);
 		
 		// Build map
-		map = new TmxMapLoader().load("maps/garden-inner-00.tmx");
+		map = level.instance().buildMap();
 		tmr = new OrthogonalTiledMapRenderer(map);
 		TiledObjectUtil.parseTiledObjectLayer(world, map.getLayers().get("collisions").getObjects());
 		
@@ -92,7 +92,13 @@ public class LevelGardenScreen extends BaseScreen {
 		table.add(textbox).expandX().align(Align.topLeft);
 
 		hud.addActor(table);
-		hud.addActor(label);
+//		hud.addActor(label);
+		
+		// Initialize camera position
+		float offset = stacy.isFacingRight() ? 0.75f : -0.75f;
+		float targetPosX = (stacy.getBody().getTransform().getPosition().x + offset) * Constants.PPM;
+		targetPosX = MathUtils.clamp(targetPosX, game.cam.viewportWidth / 4f, map.getProperties().get("width", Integer.class) * map.getProperties().get("tilewidth", Integer.class) - game.cam.viewportWidth / 4f);
+		game.cam.position.x = targetPosX;
 	}
 	
 	private void showTextBox() {
@@ -194,9 +200,11 @@ public class LevelGardenScreen extends BaseScreen {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		update(delta);
-		tmr.render(new int[] {0});
+		
+		level.instance().drawBackground(tmr);
 		stage.draw();
-		tmr.render(new int[] {1});
+		level.instance().drawForeground(tmr);
+		
 		game.batch.begin();
 		hud.draw();
 		game.batch.end();
