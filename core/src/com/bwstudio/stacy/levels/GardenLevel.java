@@ -1,5 +1,7 @@
 package com.bwstudio.stacy.levels;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -27,6 +29,11 @@ public class GardenLevel implements BaseLevel {
 		return fromLeft ?
 				new Vector2(50, 83) :
 				new Vector2(636, 83);
+	}
+	
+	@Override
+	public void buildParticle(ParticleEffect particleEffect) {
+		particleEffect.load(Gdx.files.internal("particles/relaxing.party"), Gdx.files.internal("particles"));
 	}
 
 }

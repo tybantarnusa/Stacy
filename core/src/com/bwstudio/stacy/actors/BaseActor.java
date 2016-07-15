@@ -18,4 +18,6 @@ public abstract class BaseActor extends Actor {
 	
 	public Body getBody() { return body; }
 	
+	public abstract void dispose();
+	
 }

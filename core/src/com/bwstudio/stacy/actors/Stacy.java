@@ -127,11 +127,7 @@ public class Stacy extends BaseActor {
 	private void handleInput(float delta) {
 		if (!Gdx.input.isKeyPressed(Input.Keys.LEFT) && !Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
 			state = State.IDLE;
-			if (facingRight) {
-				currentAnimation = idleAnimationR;
-			} else {
-				currentAnimation = idleAnimationL;
-			}
+			currentAnimation = facingRight ? idleAnimationR : idleAnimationL;
 		}
 		
 		if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
@@ -166,7 +162,8 @@ public class Stacy extends BaseActor {
 			}
 		
 		}
-		if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+		
+		if (Gdx.input.isKeyJustPressed(Input.Keys.UP) && !isJumping) {
 			jumpTime = maxJumpTime;
 		}
 		
@@ -230,5 +227,11 @@ public class Stacy extends BaseActor {
 	public void setIdle() {
 		state = State.IDLE;
 		currentAnimation = facingRight ? idleAnimationR : idleAnimationL;
+	}
+	
+	public void dispose() {
+		idleAnimationL.getKeyFrames()[0].getTexture().dispose();
+		startRunAnimationL.getKeyFrames()[0].getTexture().dispose();
+		runAnimationL.getKeyFrames()[0].getTexture().dispose();
 	}
 }

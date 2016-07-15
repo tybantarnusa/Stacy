@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
@@ -28,11 +29,14 @@ public class LevelScreen extends BaseScreen {
 	private Level level;
 	
 	private Stacy stacy;
+	
 	private World world;
 	private Box2DDebugRenderer b2dr;
 	
 	private OrthogonalTiledMapRenderer tmr;
 	private TiledMap map;
+	
+	private ParticleEffect pe;
 	
 	private Stage hud;
 	private Label label;
@@ -78,6 +82,8 @@ public class LevelScreen extends BaseScreen {
 		map = level.instance().buildMap();
 		tmr = new OrthogonalTiledMapRenderer(map);
 		TiledObjectUtil.parseTiledObjectLayer(world, map.getLayers().get("collisions").getObjects());
+		pe = new ParticleEffect();
+		level.instance().buildParticle(pe);
 		
 		// Build HUD
 		hud = new Stage(new FitViewport(Constants.V_WIDTH, Constants.V_HEIGHT));
@@ -193,7 +199,9 @@ public class LevelScreen extends BaseScreen {
 
 	@Override
 	public void show() {
-		
+		pe.setPosition(200, 50);
+		pe.scaleEffect(0.5f);
+		pe.start();
 	}
 
 	@Override
@@ -207,6 +215,7 @@ public class LevelScreen extends BaseScreen {
 		level.instance().drawForeground(tmr);
 		
 		game.batch.begin();
+		pe.draw(game.batch);
 		hud.draw();
 		game.batch.end();
 		
@@ -221,6 +230,11 @@ public class LevelScreen extends BaseScreen {
 		game.cam.zoom = 0.5f;
 		tmr.setView(game.cam);
 		stage.act();
+
+		pe.update(delta);
+		if (pe.isComplete()) {
+			pe.reset();
+		}
 		
 		if (interactionState == InteractionState.GAMEPLAY)
 			stacy.update(delta);
@@ -236,11 +250,16 @@ public class LevelScreen extends BaseScreen {
 		Gdx.graphics.setTitle(Constants.TITLE + " | FPS: " + Gdx.graphics.getFramesPerSecond());
 		
 		// Textbox writer
-		writeTextBox(new String[] {"Ntaps, udah bisa animasi."});
+		writeTextBox(textboxBuffers);
 		
 		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+			textboxBuffers = new String[] {"You smell a relaxing scent from the shroom.", "However, you feel uncomfortable when you see it."};
 			showTextBox();
 		}
+	}
+	
+	public void setTextboxStrings(String[] s) {
+		textboxBuffers = s;
 	}
 
 	@Override
@@ -266,6 +285,8 @@ public class LevelScreen extends BaseScreen {
 	@Override
 	public void dispose() {
 		stage.dispose();
+		hud.dispose();
+		stacy.dispose();
 		world.dispose();
 		b2dr.dispose();
 		
