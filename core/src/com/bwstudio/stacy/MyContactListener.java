@@ -18,6 +18,7 @@ public class MyContactListener implements ContactListener {
 		if (a == null || b == null) return;
 		if (a.getUserData() == null || b.getUserData() == null) return;
 		
+		// Warping
 		if (a.getUserData() instanceof Stacy &&
 			b.getUserData() instanceof Warp) {
 			((Warp) b.getUserData()).teleport();
@@ -26,6 +27,17 @@ public class MyContactListener implements ContactListener {
 		if (b.getUserData() instanceof Stacy &&
 			a.getUserData() instanceof Warp) {
 			((Warp) a.getUserData()).teleport();
+		}
+		
+		// On Ground
+		if (a.getUserData().equals("foot") &&
+			b.getUserData().equals("ground")) {
+			((Stacy) a.getBody().getFixtureList().first().getUserData()).setOnGround();
+		}
+		
+		if (b.getUserData().equals("foot") &&
+			a.getUserData().equals("ground")) {
+			((Stacy) b.getBody().getFixtureList().first().getUserData()).setOnGround();
 		}
 	}
 
@@ -36,6 +48,17 @@ public class MyContactListener implements ContactListener {
 		
 		if (a == null || b == null) return;
 		if (a.getUserData() == null || b.getUserData() == null) return;
+		
+		// Off Ground
+		if (a.getUserData().equals("foot") &&
+			b.getUserData().equals("ground")) {
+			((Stacy) a.getBody().getFixtureList().first().getUserData()).setOffGround();
+		}
+		
+		if (b.getUserData().equals("foot") &&
+			a.getUserData().equals("ground")) {
+			((Stacy) b.getBody().getFixtureList().first().getUserData()).setOffGround();
+		}
 	}
 
 	@Override

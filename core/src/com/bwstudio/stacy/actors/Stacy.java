@@ -121,11 +121,11 @@ public class Stacy extends BaseActor {
 		}
 		
 		// debug position
-		System.out.println((getX() + getWidth() / 2f) + ", " + (getY() + getHeight() / 2f));
+//		System.out.println((getX() + getWidth() / 2f) + ", " + (getY() + getHeight() / 2f));
 	}
 	
 	private void handleInput(float delta) {
-		if (!Gdx.input.isKeyPressed(Input.Keys.LEFT) && !Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+		if (!Gdx.input.isKeyPressed(Input.Keys.LEFT) && !Gdx.input.isKeyPressed(Input.Keys.RIGHT) && state != State.JUMP) {
 			state = State.IDLE;
 			currentAnimation = facingRight ? idleAnimationR : idleAnimationL;
 		}
@@ -162,9 +162,10 @@ public class Stacy extends BaseActor {
 			}
 		
 		}
-		
-		if (Gdx.input.isKeyJustPressed(Input.Keys.UP) && !isJumping) {
+
+		if (Gdx.input.isKeyJustPressed(Input.Keys.UP) && state != State.JUMP) {
 			jumpTime = maxJumpTime;
+			state = State.JUMP;
 		}
 		
 		if (jumpTime > 0 && Gdx.input.isKeyPressed(Input.Keys.UP) ) {
@@ -174,6 +175,10 @@ public class Stacy extends BaseActor {
 		} else if (isJumping) {
 			isJumping = false;
 			body.setLinearVelocity(0, jumpHeight / 2f / Constants.PPM);
+		}
+		
+		if (jumpTime > 0 && !Gdx.input.isKeyPressed(Input.Keys.UP) && state == State.JUMP) {
+			jumpTime = 0;
 		}
 		
 	}
@@ -212,7 +217,7 @@ public class Stacy extends BaseActor {
 		shape.set(new float[] {-(getWidth() / 2f - 13f) / Constants.PPM, -(getHeight() / 2f - 3f) / Constants.PPM, (getWidth() / 2f - 13f) / Constants.PPM, -(getHeight() / 2f - 3f) / Constants.PPM, getWidth() / 2f / Constants.PPM - 13f / Constants.PPM, -(getHeight() / 2f + 2f) / Constants.PPM, -(getWidth() / 2f - 13f) / Constants.PPM, -(getHeight() / 2f + 2f) / Constants.PPM});
 		fdef.shape = shape;
 		fdef.isSensor = true;
-		body.createFixture(fdef);
+		body.createFixture(fdef).setUserData("foot");
 		
 		shape.dispose();
 	}
@@ -238,5 +243,16 @@ public class Stacy extends BaseActor {
 		idleAnimationL.getKeyFrames()[0].getTexture().dispose();
 		startRunAnimationL.getKeyFrames()[0].getTexture().dispose();
 		runAnimationL.getKeyFrames()[0].getTexture().dispose();
+	}
+	
+	public void setOnGround() {
+		isJumping = false;
+		jumpTime = 0;
+		if (state == State.JUMP)
+			state = State.IDLE;
+	}
+	
+	public void setOffGround() {
+		state = State.JUMP;
 	}
 }

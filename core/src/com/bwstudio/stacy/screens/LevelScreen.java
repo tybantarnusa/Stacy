@@ -276,6 +276,11 @@ public class LevelScreen extends BaseScreen {
 					(short) (pos.y * Constants.PPM > stacy.getY() + 2 ?
 					Constants.BIT_ENEMY :
 					Constants.BIT_ENEMY | Constants.BIT_PLAYER);
+
+			if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+				filterData.maskBits = Constants.BIT_ENEMY;
+			}
+			
 			owpFixture.setFilterData(filterData);
 		}
 		
