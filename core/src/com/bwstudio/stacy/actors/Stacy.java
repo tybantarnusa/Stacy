@@ -51,7 +51,7 @@ public class Stacy extends BaseActor {
 		
 		// Properties
 		isJumping = false;
-		jumpTime = maxJumpTime = 0.2f;
+		jumpTime = maxJumpTime = 0.3f;
 		jumpHeight = 225f;
 		
 		facingRight = true;
@@ -121,7 +121,7 @@ public class Stacy extends BaseActor {
 		}
 		
 		// debug position
-//		System.out.println((getX() + getWidth() / 2f) + ", " + (getY() + getHeight() / 2f));
+		System.out.println((getX() + getWidth() / 2f) + ", " + (getY() + getHeight() / 2f));
 	}
 	
 	private void handleInput(float delta) {
@@ -199,11 +199,16 @@ public class Stacy extends BaseActor {
 		PolygonShape shape = new PolygonShape();
 		shape.set(new float[] {-5 / Constants.PPM, -17 / Constants.PPM, -5 / Constants.PPM, 15 / Constants.PPM, 5 / Constants.PPM, 15 / Constants.PPM, 5 / Constants.PPM, -17 / Constants.PPM});
 		
+		// Main Fixture
 		FixtureDef fdef = new FixtureDef();
 		fdef.shape = shape;
 		fdef.density = 0f;
+		fdef.filter.categoryBits = Constants.BIT_PLAYER;
+		fdef.filter.maskBits = (short) (Constants.BIT_GROUND | Constants.BIT_OWP | Constants.BIT_ENEMY);
 		fixture = body.createFixture(fdef);
+		fixture.setUserData(this);
 		
+		// Foot Sensor
 		shape.set(new float[] {-(getWidth() / 2f - 13f) / Constants.PPM, -(getHeight() / 2f - 3f) / Constants.PPM, (getWidth() / 2f - 13f) / Constants.PPM, -(getHeight() / 2f - 3f) / Constants.PPM, getWidth() / 2f / Constants.PPM - 13f / Constants.PPM, -(getHeight() / 2f + 2f) / Constants.PPM, -(getWidth() / 2f - 13f) / Constants.PPM, -(getHeight() / 2f + 2f) / Constants.PPM});
 		fdef.shape = shape;
 		fdef.isSensor = true;

@@ -10,18 +10,25 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.ChainShape;
+import com.badlogic.gdx.physics.box2d.Filter;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.bwstudio.stacy.Constants;
+import com.bwstudio.stacy.MyContactListener;
 import com.bwstudio.stacy.MyGame;
 import com.bwstudio.stacy.TiledObjectUtil;
 import com.bwstudio.stacy.actors.Stacy;
+import com.bwstudio.stacy.actors.Warp;
 import com.bwstudio.stacy.levels.Level;
 
 public class LevelScreen extends BaseScreen {
@@ -29,12 +36,14 @@ public class LevelScreen extends BaseScreen {
 	private Level level;
 	
 	private Stacy stacy;
+	private Array<Warp> warps;
 	
 	private World world;
 	private Box2DDebugRenderer b2dr;
 	
 	private OrthogonalTiledMapRenderer tmr;
 	private TiledMap map;
+	private Array<Body> owpBodies;
 	
 	private ParticleEffect pe;
 	
@@ -67,6 +76,7 @@ public class LevelScreen extends BaseScreen {
 		// Create Box2D world
 		world = new World(new Vector2(0, -9.8f), true);
 		b2dr = new Box2DDebugRenderer();
+		world.setContactListener(new MyContactListener());
 		
 		// Create main character
 		Vector2 startingPosition = level.instance().getStartingPosition(fromLeft);
@@ -79,11 +89,21 @@ public class LevelScreen extends BaseScreen {
 		stage.addActor(stacy);
 		
 		// Build map
+		owpBodies = new Array<Body>();
 		map = level.instance().buildMap();
 		tmr = new OrthogonalTiledMapRenderer(map);
 		TiledObjectUtil.parseTiledObjectLayer(world, map.getLayers().get("collisions").getObjects());
+		if (map.getLayers().get("owp") != null)
+			owpBodies = TiledObjectUtil.parseOneWayPlatforms(world, map.getLayers().get("owp").getObjects());
 		pe = new ParticleEffect();
 		level.instance().buildParticle(pe);
+		
+		// Create warp points
+		warps = level.instance().buildWarpPoints(game);
+		for (Warp warp : warps) {
+			warp.createPhysics(world);
+		}
+		
 		
 		// Build HUD
 		hud = new Stage(new FitViewport(Constants.V_WIDTH, Constants.V_HEIGHT));
@@ -105,6 +125,13 @@ public class LevelScreen extends BaseScreen {
 		float targetPosX = (stacy.getBody().getTransform().getPosition().x + offset) * Constants.PPM;
 		targetPosX = MathUtils.clamp(targetPosX, game.cam.viewportWidth / 4f, map.getProperties().get("width", Integer.class) * map.getProperties().get("tilewidth", Integer.class) - game.cam.viewportWidth / 4f);
 		game.cam.position.x = targetPosX;
+		if (level.instance().getYBounds() != null)
+			game.cam.position.y = MathUtils.clamp(game.cam.position.y, level.instance().getYBounds().x, level.instance().getYBounds().y);
+		else {
+			float targetPosY = (stacy.getBody().getTransform().getPosition().y) * Constants.PPM;
+			targetPosY = MathUtils.clamp(targetPosY, game.cam.viewportHeight / 4f, map.getProperties().get("height", Integer.class) * map.getProperties().get("tileheight", Integer.class) - game.cam.viewportHeight / 4f);
+			game.cam.position.y = targetPosY;
+		}
 	}
 	
 	private void showTextBox() {
@@ -239,12 +266,31 @@ public class LevelScreen extends BaseScreen {
 		if (interactionState == InteractionState.GAMEPLAY)
 			stacy.update(delta);
 		
+		// One-Way Platforms
+		for (Body owp : owpBodies) {
+			Fixture owpFixture = owp.getFixtureList().first();
+			Filter filterData = owpFixture.getFilterData();
+			Vector2 pos = new Vector2();
+			((ChainShape) owp.getFixtureList().first().getShape()).getVertex(0, pos);
+			filterData.maskBits =
+					(short) (pos.y * Constants.PPM > stacy.getY() + 2 ?
+					Constants.BIT_ENEMY :
+					Constants.BIT_ENEMY | Constants.BIT_PLAYER);
+			owpFixture.setFilterData(filterData);
+		}
+		
 		// Camera follows main character
 		float offset = stacy.isFacingRight() ? 0.75f : -0.75f;
 		float targetPosX = (stacy.getBody().getTransform().getPosition().x + offset) * Constants.PPM;
 		targetPosX = MathUtils.clamp(targetPosX, game.cam.viewportWidth / 4f, map.getProperties().get("width", Integer.class) * map.getProperties().get("tilewidth", Integer.class) - game.cam.viewportWidth / 4f);
-		game.cam.position.x = (game.cam.position.x + (targetPosX - game.cam.position.x) * 0.03f);
-		game.cam.position.y = MathUtils.clamp(game.cam.position.y, game.cam.viewportHeight / 4f - 32, Integer.MAX_VALUE);
+		game.cam.position.x = game.cam.position.x + (targetPosX - game.cam.position.x) * 0.03f;
+		if (level.instance().getYBounds() != null)
+			game.cam.position.y = MathUtils.clamp(game.cam.position.y, level.instance().getYBounds().x, level.instance().getYBounds().y);
+		else {
+			float targetPosY = (stacy.getBody().getTransform().getPosition().y + 0.5f) * Constants.PPM;
+			targetPosY = MathUtils.clamp(targetPosY, game.cam.viewportHeight / 4f, map.getProperties().get("height", Integer.class) * map.getProperties().get("tileheight", Integer.class) - game.cam.viewportHeight / 4f);
+			game.cam.position.y = game.cam.position.y + (targetPosY - game.cam.position.y) * 0.03f;
+		}
 		
 		// Title and FPS counter
 		Gdx.graphics.setTitle(Constants.TITLE + " | FPS: " + Gdx.graphics.getFramesPerSecond());

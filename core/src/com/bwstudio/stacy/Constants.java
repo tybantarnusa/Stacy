@@ -12,4 +12,12 @@ public class Constants {
 	// Pixel Per Meter
 	public static float PPM = 100f;
 	
+	// Collision Bits
+	public static short BIT_GROUND = 0b00000001;
+	public static short BIT_PLAYER = 0b00000010;
+	public static short BIT_OWP = 0b00000100;
+	public static short BIT_ENEMY = 0b00001000;
+	public static short BIT_BULLET_ENEMY = 0b00010000;
+	public static short BIT_BULLET_PLAYER = 0b00100000;
+	
 }

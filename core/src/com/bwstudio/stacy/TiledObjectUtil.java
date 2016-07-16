@@ -7,8 +7,11 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.ChainShape;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 
 public class TiledObjectUtil {
 	
@@ -26,9 +29,43 @@ public class TiledObjectUtil {
 			BodyDef bdef = new BodyDef();
 			bdef.type = BodyDef.BodyType.StaticBody;
 			body = world.createBody(bdef);
-			body.createFixture(shape, 1.0f);
+			FixtureDef fdef = new FixtureDef();
+			fdef.shape = shape;
+			fdef.density = 1.0f;
+			fdef.filter.categoryBits = Constants.BIT_GROUND;
+			fdef.filter.categoryBits = (short) (Constants.BIT_PLAYER | Constants.BIT_ENEMY);
+			Fixture fixture = body.createFixture(fdef);
+			fixture.setUserData("ground");
 			shape.dispose();
 		}
+	}
+	
+	public static Array<Body> parseOneWayPlatforms(World world, MapObjects objects) {
+		Array<Body> owpBodies = new Array<Body>();
+		for (MapObject object : objects) {
+			Shape shape;
+			
+			if (object instanceof PolylineMapObject) {
+				shape = createPolyline((PolylineMapObject) object);
+			} else {
+				continue;
+			}
+			
+			Body body;
+			BodyDef bdef = new BodyDef();
+			bdef.type = BodyDef.BodyType.StaticBody;
+			body = world.createBody(bdef);
+			FixtureDef fdef = new FixtureDef();
+			fdef.shape = shape;
+			fdef.density = 1.0f;
+			fdef.filter.categoryBits = Constants.BIT_OWP;
+			fdef.filter.categoryBits = (short) (Constants.BIT_ENEMY);
+			Fixture fixture = body.createFixture(fdef);
+			fixture.setUserData("owp");
+			shape.dispose();
+			owpBodies.add(body);
+		}
+		return owpBodies;
 	}
 	
 	private static ChainShape createPolyline(PolylineMapObject polyline) {

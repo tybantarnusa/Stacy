@@ -13,8 +13,8 @@ public abstract class BaseActor extends Actor {
 		super();
 	}
 	
-	protected abstract void update(float delta);
-	protected abstract void createPhysics(World world);
+	public abstract void update(float delta);
+	public abstract void createPhysics(World world);
 	
 	public Body getBody() { return body; }
 	

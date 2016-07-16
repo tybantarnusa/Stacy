@@ -1,6 +1,7 @@
 package com.bwstudio.stacy.levels;
 
 public enum Level {
+	GARDEN_INNER(new InnerGardenLevel()),
 	GARDEN(new GardenLevel());
 	
 	private final BaseLevel instance;
