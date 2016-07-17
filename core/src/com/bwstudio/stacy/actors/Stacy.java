@@ -13,7 +13,6 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.bwstudio.stacy.Constants;
 
 public class Stacy extends BaseActor {
@@ -229,10 +228,10 @@ public class Stacy extends BaseActor {
 	public void act(float delta) {
 		super.act(delta);
 	    timePassed += delta;
-	};
+	}
 	
 	@Override
-	public void draw(Batch batch, float ParentAlpha){
+	public void draw(Batch batch, float parentAlpha){
 	    TextureRegion currentFrame = currentAnimation.getKeyFrame(timePassed);
 	    batch.draw(currentFrame, getX(), getY(), getWidth(), getHeight());
 	}
@@ -250,6 +249,7 @@ public class Stacy extends BaseActor {
 		FixtureDef fdef = new FixtureDef();
 		fdef.shape = shape;
 		fdef.density = 0f;
+		fdef.friction = 0.2f;
 		fdef.filter.categoryBits = Constants.BIT_PLAYER;
 		fdef.filter.maskBits = (short) (Constants.BIT_GROUND | Constants.BIT_OWP | Constants.BIT_ENEMY);
 		fixture = body.createFixture(fdef);
@@ -257,6 +257,12 @@ public class Stacy extends BaseActor {
 		
 		// Foot Sensor
 		shape.set(new float[] {-(getWidth() / 2f - 13f) / Constants.PPM, -(getHeight() / 2f - 3f) / Constants.PPM, (getWidth() / 2f - 13f) / Constants.PPM, -(getHeight() / 2f - 3f) / Constants.PPM, getWidth() / 2f / Constants.PPM - 13f / Constants.PPM, -(getHeight() / 2f + 2f) / Constants.PPM, -(getWidth() / 2f - 13f) / Constants.PPM, -(getHeight() / 2f + 2f) / Constants.PPM});
+		fdef.shape = shape;
+		fdef.isSensor = true;
+		body.createFixture(fdef).setUserData("foot");
+		
+		// Head Sensor
+		shape.set(new float[] {-3 / Constants.PPM, 3 / Constants.PPM, -3 / Constants.PPM, 15 / Constants.PPM, 3 / Constants.PPM, 15 / Constants.PPM, 3 / Constants.PPM, 3 / Constants.PPM});
 		fdef.shape = shape;
 		fdef.isSensor = true;
 		body.createFixture(fdef).setUserData("foot");
@@ -289,13 +295,14 @@ public class Stacy extends BaseActor {
 	}
 	
 	public void setOffGround() {
-		state = State.JUMP;
+		if (state != State.HURT)
+			state = State.JUMP;
 	}
 	
-	public void damaged() {
+	public void giveDamage(int amount, float knockback) {
 		state = State.HURT;
-		hurtTime = 0.3f;
-		addAction(Actions.moveBy(-50, 50));
+		hurtTime = knockback < 100 ? 0.3f : 0.5f;
+		body.applyForceToCenter(facingRight ? -knockback : knockback, knockback * 1.5f, true);
 	}
 	
 	public void dispose() {

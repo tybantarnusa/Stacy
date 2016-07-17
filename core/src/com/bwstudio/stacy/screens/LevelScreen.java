@@ -17,7 +17,6 @@ import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -85,7 +84,6 @@ public class LevelScreen extends BaseScreen {
 		stacy.setPosition(startingPosition.x, startingPosition.y);
 		stacy.createPhysics(world);
 		if (fromLeft) stacy.faceRight(); else stacy.faceLeft();
-		stacy.addAction(Actions.sequence(Actions.alpha(0, 0.3f)));
 		
 		// Add entities to stage
 		stage.addActor(stacy);
@@ -257,7 +255,7 @@ public class LevelScreen extends BaseScreen {
 		game.cam.update();
 		game.cam.zoom = 0.5f;
 		tmr.setView(game.cam);
-		stage.act();
+		stage.act(delta);
 
 		pe.update(delta);
 		if (pe.isComplete()) {
@@ -310,7 +308,7 @@ public class LevelScreen extends BaseScreen {
 		}
 		
 		if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
-			stacy.damaged();
+			stacy.giveDamage(0, 50);
 		}
 	}
 	

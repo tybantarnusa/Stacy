@@ -32,6 +32,7 @@ public class TiledObjectUtil {
 			FixtureDef fdef = new FixtureDef();
 			fdef.shape = shape;
 			fdef.density = 1.0f;
+			fdef.friction = 0.5f;
 			fdef.filter.categoryBits = Constants.BIT_GROUND;
 			fdef.filter.categoryBits = (short) (Constants.BIT_PLAYER | Constants.BIT_ENEMY);
 			Fixture fixture = body.createFixture(fdef);
