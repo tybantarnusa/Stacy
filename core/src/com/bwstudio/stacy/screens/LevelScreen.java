@@ -17,6 +17,7 @@ import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -84,6 +85,7 @@ public class LevelScreen extends BaseScreen {
 		stacy.setPosition(startingPosition.x, startingPosition.y);
 		stacy.createPhysics(world);
 		if (fromLeft) stacy.faceRight(); else stacy.faceLeft();
+		stacy.addAction(Actions.sequence(Actions.alpha(0, 0.3f)));
 		
 		// Add entities to stage
 		stage.addActor(stacy);
@@ -103,7 +105,6 @@ public class LevelScreen extends BaseScreen {
 		for (Warp warp : warps) {
 			warp.createPhysics(world);
 		}
-		
 		
 		// Build HUD
 		hud = new Stage(new FitViewport(Constants.V_WIDTH, Constants.V_HEIGHT));
@@ -306,6 +307,10 @@ public class LevelScreen extends BaseScreen {
 		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
 			textboxBuffers = new String[] {"You smell a relaxing scent from the shroom.", "However, you feel uncomfortable when you see it."};
 			showTextBox();
+		}
+		
+		if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
+			stacy.damaged();
 		}
 	}
 	

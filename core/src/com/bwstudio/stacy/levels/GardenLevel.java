@@ -39,8 +39,7 @@ public class GardenLevel implements BaseLevel {
 	}
 	
 	@Override
-	public void buildParticle(ParticleEffect particleEffect) {
-	}
+	public void buildParticle(ParticleEffect particleEffect) {}
 
 	@Override
 	public Array<Warp> buildWarpPoints(MyGame game) {

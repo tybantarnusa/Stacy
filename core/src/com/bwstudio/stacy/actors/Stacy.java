@@ -13,6 +13,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.bwstudio.stacy.Constants;
 
 public class Stacy extends BaseActor {
@@ -33,7 +34,11 @@ public class Stacy extends BaseActor {
 	private Animation startRunAnimationL;
 	private Animation runAnimationR;
 	private Animation runAnimationL;
+	private Animation hurtR;
+	private Animation hurtL;
 	private Animation currentAnimation;
+	
+	private float hurtTime;
 	
 	// States
 	private enum State {
@@ -41,7 +46,8 @@ public class Stacy extends BaseActor {
 		INIT_RUN,
 		RUN,
 		STOP_RUN,
-		JUMP
+		JUMP,
+		HURT
 	}
 	private State state;
 	
@@ -52,11 +58,10 @@ public class Stacy extends BaseActor {
 		// Properties
 		isJumping = false;
 		jumpTime = maxJumpTime = 0.3f;
-		jumpHeight = 225f;
-		
+		jumpHeight = 250f;
 		facingRight = true;
 		walkingSpeed = 1.65f;
-		
+		hurtTime = 0;
 		state = State.IDLE;
 		
 		
@@ -102,9 +107,23 @@ public class Stacy extends BaseActor {
 		runAnimationL = new Animation(0.07f, mirror);
 		runAnimationL.setPlayMode(PlayMode.LOOP);
 		
+		// Hurt
+		texture = new Texture("chars/stacy/stacy_hurt.png");
+		texture.setFilter(TextureFilter.Linear, TextureFilter.Nearest);
+		frames = new TextureRegion(texture).split(36, 39)[0];
+		mirror = new TextureRegion(texture).split(36, 39)[0];
+		for(TextureRegion m : mirror) {
+			m.flip(true, false);
+		}
+		hurtR = new Animation(0.07f, frames);
+		hurtR.setPlayMode(PlayMode.LOOP);
+		hurtL = new Animation(0.07f, mirror);
+		hurtL.setPlayMode(PlayMode.LOOP);
+		
 		currentAnimation = idleAnimationR;
 		setBounds(0, 0, 32, 39);
 		setSize(32, 39);
+		
 	}
 	
 	public void update(float delta) {
@@ -119,68 +138,91 @@ public class Stacy extends BaseActor {
 			state = State.RUN;
 			currentAnimation = facingRight ? runAnimationR : runAnimationL;
 		}
+	    
+	    if (state == State.IDLE) {
+	    	currentAnimation = facingRight ? idleAnimationR : idleAnimationL;
+	    }
+	    
+	    if (body.getLinearVelocity().y == 0 && state == State.JUMP) {
+	    	state = State.IDLE;
+	    }
+	    
+	    if (hurtTime > 0) {
+	    	hurtTime -= delta;
+	    	currentAnimation = facingRight ? hurtR : hurtL;
+	    } else if (state == State.HURT) {
+	    	state = State.IDLE;
+	    }
+	    
 		
 		// debug position
 //		System.out.println((getX() + getWidth() / 2f) + ", " + (getY() + getHeight() / 2f));
 	}
 	
 	private void handleInput(float delta) {
-		if (!Gdx.input.isKeyPressed(Input.Keys.LEFT) && !Gdx.input.isKeyPressed(Input.Keys.RIGHT) && state != State.JUMP) {
-			state = State.IDLE;
-			currentAnimation = facingRight ? idleAnimationR : idleAnimationL;
-		}
 		
-		if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
-			state = State.INIT_RUN;
-			currentAnimation = facingRight ? startRunAnimationR : startRunAnimationL;
-		}
+		if (state != State.HURT) {
 		
-		if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-			
-			setIdle();
-		
-		} else {
-		
-			if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-				body.setTransform(body.getTransform().getPosition().x - walkingSpeed / Constants.PPM, body.getTransform().getPosition().y, 0);
-				body.setAwake(true);
-				faceLeft();
-				
-				if (state != State.INIT_RUN) {
-					currentAnimation = runAnimationL;
-				}
+			if (!Gdx.input.isKeyPressed(Input.Keys.LEFT) && !Gdx.input.isKeyPressed(Input.Keys.RIGHT) && state != State.JUMP) {
+				state = State.IDLE;
+				currentAnimation = facingRight ? idleAnimationR : idleAnimationL;
 			}
 			
-			if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-				body.setTransform(body.getTransform().getPosition().x + walkingSpeed / Constants.PPM, body.getTransform().getPosition().y, 0);
-				body.setAwake(true);
-				faceRight();
+			if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+				state = state != State.JUMP ? State.INIT_RUN : State.JUMP;
+				currentAnimation = facingRight ? startRunAnimationR : startRunAnimationL;
+			}
+			
+			if (Gdx.input.isKeyPressed(Input.Keys.LEFT) && Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
 				
-				if (state != State.INIT_RUN) {
-					currentAnimation = runAnimationR;
+				setIdle();
+			
+			} else {
+			
+				if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+					body.setTransform(body.getTransform().getPosition().x - walkingSpeed / Constants.PPM, body.getTransform().getPosition().y, 0);
+					body.setAwake(true);
+					faceLeft();
+					
+					if (state != State.INIT_RUN && state != State.JUMP) {
+						state = State.RUN;
+						currentAnimation = runAnimationL;
+					}
 				}
+				
+				if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+					body.setTransform(body.getTransform().getPosition().x + walkingSpeed / Constants.PPM, body.getTransform().getPosition().y, 0);
+					body.setAwake(true);
+					faceRight();
+					
+					if (state != State.INIT_RUN && state != State.JUMP) {
+						state = State.RUN;
+						currentAnimation = runAnimationR;
+					}
+				}
+			
+			}
+	
+			if (Gdx.input.isKeyJustPressed(Input.Keys.UP) && state != State.JUMP) {
+				jumpTime = maxJumpTime;
+				state = State.JUMP;
+			}
+			
+			if (jumpTime > 0 && Gdx.input.isKeyPressed(Input.Keys.UP) ) {
+				body.setLinearVelocity(0, jumpHeight / Constants.PPM);
+				isJumping = true;
+				jumpTime -= delta;
+			} else if (isJumping) {
+				isJumping = false;
+				body.setLinearVelocity(0, jumpHeight / 2f / Constants.PPM);
+			}
+			
+			if (jumpTime > 0 && !Gdx.input.isKeyPressed(Input.Keys.UP) && state == State.JUMP) {
+				jumpTime = 0;
 			}
 		
 		}
 
-		if (Gdx.input.isKeyJustPressed(Input.Keys.UP) && state != State.JUMP) {
-			jumpTime = maxJumpTime;
-			state = State.JUMP;
-		}
-		
-		if (jumpTime > 0 && Gdx.input.isKeyPressed(Input.Keys.UP) ) {
-			body.setLinearVelocity(0, jumpHeight / Constants.PPM);
-			isJumping = true;
-			jumpTime -= delta;
-		} else if (isJumping) {
-			isJumping = false;
-			body.setLinearVelocity(0, jumpHeight / 2f / Constants.PPM);
-		}
-		
-		if (jumpTime > 0 && !Gdx.input.isKeyPressed(Input.Keys.UP) && state == State.JUMP) {
-			jumpTime = 0;
-		}
-		
 	}
 	
 	@Override
@@ -239,12 +281,6 @@ public class Stacy extends BaseActor {
 		currentAnimation = facingRight ? idleAnimationR : idleAnimationL;
 	}
 	
-	public void dispose() {
-		idleAnimationL.getKeyFrames()[0].getTexture().dispose();
-		startRunAnimationL.getKeyFrames()[0].getTexture().dispose();
-		runAnimationL.getKeyFrames()[0].getTexture().dispose();
-	}
-	
 	public void setOnGround() {
 		isJumping = false;
 		jumpTime = 0;
@@ -254,5 +290,18 @@ public class Stacy extends BaseActor {
 	
 	public void setOffGround() {
 		state = State.JUMP;
+	}
+	
+	public void damaged() {
+		state = State.HURT;
+		hurtTime = 0.3f;
+		addAction(Actions.moveBy(-50, 50));
+	}
+	
+	public void dispose() {
+		idleAnimationL.getKeyFrames()[0].getTexture().dispose();
+		startRunAnimationL.getKeyFrames()[0].getTexture().dispose();
+		runAnimationL.getKeyFrames()[0].getTexture().dispose();
+		hurtL.getKeyFrames()[0].getTexture().dispose();
 	}
 }
