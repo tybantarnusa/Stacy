@@ -1,4 +1,4 @@
-package com.bwstudio.stacy.levels;
+package com.bwstudio.stacy.levels.garden;
 
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -8,31 +8,26 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.bwstudio.stacy.MyGame;
 import com.bwstudio.stacy.actors.Warp;
+import com.bwstudio.stacy.levels.BaseLevel;
+import com.bwstudio.stacy.levels.Level;
 
-public class GardenLevel implements BaseLevel {
+public class Garden2Level implements BaseLevel {
 
 	@Override
 	public TiledMap buildMap() {
-		return new TmxMapLoader().load("maps/garden-01.tmx");
+		return new TmxMapLoader().load("maps/garden-02.tmx");
 	}
 	
 	@Override
 	public void drawBackground(TiledMapRenderer tmr) {
-		tmr.render(new int[] {0, 1});
+		tmr.render(new int[] {0, 1, 2});
 	}
 
 	@Override
 	public void drawForeground(TiledMapRenderer tmr) {
-		tmr.render(new int[] {2, 3});
+		tmr.render(new int[] {3, 4});
 	}
 
-	@Override
-	public Vector2 getStartingPosition(boolean fromLeft) {
-		return fromLeft ?
-				new Vector2(5.45f, 50.5f) :
-				new Vector2(636, 83);
-	}
-	
 	@Override
 	public Vector2 getYBounds() {
 		return null;
@@ -45,10 +40,17 @@ public class GardenLevel implements BaseLevel {
 	public Array<Warp> buildWarpPoints(MyGame game) {
 		Array<Warp> warps = new Array<Warp>();
 
-		Warp warp = new Warp(game, Level.GARDEN_INNER, false, -25, 64);
+		Warp warp = new Warp(game, -25, 32 * 6, 1, 8, Level.GARDEN_1, 630, -1111, false);
+		warps.add(warp);
+		warp = new Warp(game, 32 * 14, -40, 2, 1, Level.GARDEN_INNER_1, -1111, 320, false);
 		warps.add(warp);
 		
 		return warps;
+	}
+
+	@Override
+	public Vector2 offset() {
+		return new Vector2(126, -200);
 	}
 
 }

@@ -14,13 +14,15 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.bwstudio.stacy.Constants;
+import com.bwstudio.stacy.DataThroughLevels;
 
 public class Stacy extends BaseActor {
 	
 	private boolean isJumping;
-	private float jumpHeight;
 	private float jumpTime;
 	private float maxJumpTime;
+	private float minJumpHeight;
+	private float minJumpVelocity;
 	
 	private boolean facingRight;
 	private float walkingSpeed;
@@ -40,7 +42,7 @@ public class Stacy extends BaseActor {
 	private float hurtTime;
 	
 	// States
-	private enum State {
+	public enum State {
 		IDLE,
 		INIT_RUN,
 		RUN,
@@ -50,14 +52,19 @@ public class Stacy extends BaseActor {
 	}
 	private State state;
 	
-	public Stacy() {
+	public Stacy(World world, float startingPosX, float startingPosY) {
 		super();
 		setOrigin(getOriginX() + getWidth()/2f, getOriginY() + getHeight() / 2f);
+		setPosition(startingPosX, startingPosY);
+		createPhysics(world);
+		DataThroughLevels.STACY_W = getWidth();
+		DataThroughLevels.STACY_H = getHeight();
 		
 		// Properties
 		isJumping = false;
-		jumpTime = maxJumpTime = 0.3f;
-		jumpHeight = 250f;
+		jumpTime = maxJumpTime = 0.55f;
+		minJumpHeight = 0.2f;
+		minJumpVelocity = (float) Math.sqrt(2 * Math.abs(body.getWorld().getGravity().y) * minJumpHeight);
 		facingRight = true;
 		walkingSpeed = 1.65f;
 		hurtTime = 0;
@@ -153,7 +160,12 @@ public class Stacy extends BaseActor {
 	    	state = State.IDLE;
 	    }
 	    
-		
+	    // Jump
+//	    body.setLinearVelocity(body.getLinearVelocity().x, body.getLinearVelocity().y * 0.9f);
+	    if (body.getLinearVelocity().y != 0) {
+	    	state = State.JUMP;
+	    }
+	    
 		// debug position
 //		System.out.println((getX() + getWidth() / 2f) + ", " + (getY() + getHeight() / 2f));
 	}
@@ -208,16 +220,18 @@ public class Stacy extends BaseActor {
 			}
 			
 			if (jumpTime > 0 && Gdx.input.isKeyPressed(Input.Keys.UP) ) {
-				body.setLinearVelocity(0, jumpHeight / Constants.PPM);
+				body.setLinearVelocity(0, jumpTime * Math.abs(body.getWorld().getGravity().y));
 				isJumping = true;
 				jumpTime -= delta;
 			} else if (isJumping) {
 				isJumping = false;
-				body.setLinearVelocity(0, jumpHeight / 2f / Constants.PPM);
+//				body.setLinearVelocity(0, jumpHeight / 2f / Constants.PPM);
 			}
-			
+
 			if (jumpTime > 0 && !Gdx.input.isKeyPressed(Input.Keys.UP) && state == State.JUMP) {
 				jumpTime = 0;
+				if (body.getLinearVelocity().y > minJumpVelocity)
+					body.setLinearVelocity(body.getLinearVelocity().x, minJumpVelocity);
 			}
 		
 		}
@@ -251,7 +265,7 @@ public class Stacy extends BaseActor {
 		fdef.density = 0f;
 		fdef.friction = 0.2f;
 		fdef.filter.categoryBits = Constants.BIT_PLAYER;
-		fdef.filter.maskBits = (short) (Constants.BIT_GROUND | Constants.BIT_OWP | Constants.BIT_ENEMY);
+		fdef.filter.maskBits = (short) (Constants.BIT_OBSTACLE | Constants.BIT_OWP | Constants.BIT_ENEMY);
 		fixture = body.createFixture(fdef);
 		fixture.setUserData(this);
 		
@@ -265,7 +279,7 @@ public class Stacy extends BaseActor {
 		shape.set(new float[] {-3 / Constants.PPM, 3 / Constants.PPM, -3 / Constants.PPM, 15 / Constants.PPM, 3 / Constants.PPM, 15 / Constants.PPM, 3 / Constants.PPM, 3 / Constants.PPM});
 		fdef.shape = shape;
 		fdef.isSensor = true;
-		body.createFixture(fdef).setUserData("foot");
+		body.createFixture(fdef).setUserData("head");
 		
 		shape.dispose();
 	}
@@ -290,8 +304,6 @@ public class Stacy extends BaseActor {
 	public void setOnGround() {
 		isJumping = false;
 		jumpTime = 0;
-		if (state == State.JUMP)
-			state = State.IDLE;
 	}
 	
 	public void setOffGround() {
@@ -311,4 +323,33 @@ public class Stacy extends BaseActor {
 		runAnimationL.getKeyFrames()[0].getTexture().dispose();
 		hurtL.getKeyFrames()[0].getTexture().dispose();
 	}
+
+	public void setJumping(boolean isJumping) {
+		this.isJumping = isJumping;
+	}
+	
+	public boolean isJumping() {
+		return isJumping;
+	}
+	
+	public void setJumpTime(float jumpTime) {
+		this.jumpTime = jumpTime;
+	}
+	
+	public float getJumpTime() {
+		return jumpTime;
+	}
+
+	public void setState(State state) {
+		this.state = state;
+	}
+	
+	public State getState() {
+		return state;
+	}
+
+	public void setYVelocity(float yVelocity) {
+		body.setLinearVelocity(body.getLinearVelocity().x, yVelocity);
+	}
+	
 }

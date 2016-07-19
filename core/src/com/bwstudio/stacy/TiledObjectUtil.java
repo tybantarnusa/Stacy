@@ -15,7 +15,7 @@ import com.badlogic.gdx.utils.Array;
 
 public class TiledObjectUtil {
 	
-	public static void parseTiledObjectLayer(World world, MapObjects objects) {
+	public static void parseGround(World world, MapObjects objects) {
 		for (MapObject object : objects) {
 			Shape shape;
 			
@@ -33,10 +33,89 @@ public class TiledObjectUtil {
 			fdef.shape = shape;
 			fdef.density = 1.0f;
 			fdef.friction = 0.5f;
-			fdef.filter.categoryBits = Constants.BIT_GROUND;
+			fdef.filter.categoryBits = Constants.BIT_OBSTACLE;
 			fdef.filter.categoryBits = (short) (Constants.BIT_PLAYER | Constants.BIT_ENEMY);
 			Fixture fixture = body.createFixture(fdef);
 			fixture.setUserData("ground");
+			shape.dispose();
+		}
+	}
+	
+	public static void parseWall(World world, MapObjects objects) {
+		for (MapObject object : objects) {
+			Shape shape;
+			
+			if (object instanceof PolylineMapObject) {
+				shape = createPolyline((PolylineMapObject) object);
+			} else {
+				continue;
+			}
+			
+			Body body;
+			BodyDef bdef = new BodyDef();
+			bdef.type = BodyDef.BodyType.StaticBody;
+			body = world.createBody(bdef);
+			FixtureDef fdef = new FixtureDef();
+			fdef.shape = shape;
+			fdef.density = 1.0f;
+			fdef.friction = 0.5f;
+			fdef.filter.categoryBits = Constants.BIT_OBSTACLE;
+			fdef.filter.categoryBits = (short) (Constants.BIT_PLAYER | Constants.BIT_ENEMY);
+			Fixture fixture = body.createFixture(fdef);
+			fixture.setUserData("wall");
+			shape.dispose();
+		}
+	}
+	
+	public static void parseCeiling(World world, MapObjects objects) {
+		for (MapObject object : objects) {
+			Shape shape;
+			
+			if (object instanceof PolylineMapObject) {
+				shape = createPolyline((PolylineMapObject) object);
+			} else {
+				continue;
+			}
+			
+			Body body;
+			BodyDef bdef = new BodyDef();
+			bdef.type = BodyDef.BodyType.StaticBody;
+			body = world.createBody(bdef);
+			FixtureDef fdef = new FixtureDef();
+			fdef.shape = shape;
+			fdef.density = 1.0f;
+			fdef.friction = 0.5f;
+			fdef.filter.categoryBits = Constants.BIT_OBSTACLE;
+			fdef.filter.categoryBits = (short) (Constants.BIT_PLAYER | Constants.BIT_ENEMY);
+			Fixture fixture = body.createFixture(fdef);
+			fixture.setUserData("ceiling");
+			shape.dispose();
+		}
+	}
+	
+	public static void parseDeathPoints(World world, MapObjects objects) {
+		for (MapObject object : objects) {
+			Shape shape;
+			
+			if (object instanceof PolylineMapObject) {
+				shape = createPolyline((PolylineMapObject) object);
+			} else {
+				continue;
+			}
+			
+			Body body;
+			BodyDef bdef = new BodyDef();
+			bdef.type = BodyDef.BodyType.StaticBody;
+			body = world.createBody(bdef);
+			FixtureDef fdef = new FixtureDef();
+			fdef.shape = shape;
+			fdef.density = 1.0f;
+			fdef.friction = 0.5f;
+			fdef.filter.categoryBits = Constants.BIT_OBSTACLE;
+			fdef.filter.categoryBits = (short) Constants.BIT_PLAYER;
+			fdef.isSensor = true;
+			Fixture fixture = body.createFixture(fdef);
+			fixture.setUserData("death");
 			shape.dispose();
 		}
 	}

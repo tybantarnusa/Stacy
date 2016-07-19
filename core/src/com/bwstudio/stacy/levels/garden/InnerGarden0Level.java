@@ -1,4 +1,4 @@
-package com.bwstudio.stacy.levels;
+package com.bwstudio.stacy.levels.garden;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
@@ -10,8 +10,10 @@ import com.badlogic.gdx.utils.Array;
 import com.bwstudio.stacy.Constants;
 import com.bwstudio.stacy.MyGame;
 import com.bwstudio.stacy.actors.Warp;
+import com.bwstudio.stacy.levels.BaseLevel;
+import com.bwstudio.stacy.levels.Level;
 
-public class InnerGardenLevel implements BaseLevel {
+public class InnerGarden0Level implements BaseLevel {
 
 	@Override
 	public TiledMap buildMap() {
@@ -29,13 +31,6 @@ public class InnerGardenLevel implements BaseLevel {
 	}
 
 	@Override
-	public Vector2 getStartingPosition(boolean fromLeft) {
-		return fromLeft ?
-				new Vector2(50, 83) :
-				new Vector2(636, 83);
-	}
-	
-	@Override
 	public void buildParticle(ParticleEffect particleEffect) {
 		particleEffect.load(Gdx.files.internal("particles/relaxing.party"), Gdx.files.internal("particles"));
 	}
@@ -49,10 +44,15 @@ public class InnerGardenLevel implements BaseLevel {
 	public Array<Warp> buildWarpPoints(MyGame game) {
 		Array<Warp> warps = new Array<Warp>();
 
-		Warp warp = new Warp(game, Level.GARDEN, true, 665, 100);
+		Warp warp = new Warp(game, 665, 125, 1, 2, Level.GARDEN_1, 5.45f, 50.5f, true);
 		warps.add(warp);
 		
 		return warps;
+	}
+
+	@Override
+	public Vector2 offset() {
+		return new Vector2(0, 63);
 	}
 
 }

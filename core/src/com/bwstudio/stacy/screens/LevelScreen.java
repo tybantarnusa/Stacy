@@ -24,6 +24,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.bwstudio.stacy.Constants;
+import com.bwstudio.stacy.DataThroughLevels;
 import com.bwstudio.stacy.MyContactListener;
 import com.bwstudio.stacy.MyGame;
 import com.bwstudio.stacy.TiledObjectUtil;
@@ -49,6 +50,7 @@ public class LevelScreen extends BaseScreen {
 	
 	private Stage hud;
 	private Label label;
+	private Label position;
 	private Label textbox;
 	private String[] textboxBuffers;
 	private int textboxBuffersIndex;
@@ -65,8 +67,8 @@ public class LevelScreen extends BaseScreen {
 		HIDE_TEXTBOX
 	}
 	
-	public LevelScreen(final MyGame game, BaseScreen prevScreen, boolean fromLeft, Level level) {
-		super(game, prevScreen);
+	public LevelScreen(final MyGame game, Level level, float startingPosX, float startingPosY, boolean faceRight) {
+		super(game, null);
 		
 		this.level = level;
 		
@@ -74,16 +76,18 @@ public class LevelScreen extends BaseScreen {
 		interactionState = InteractionState.GAMEPLAY;
 		
 		// Create Box2D world
-		world = new World(new Vector2(0, -9.8f), true);
+		world = new World(new Vector2(0, -9.8f/2f), true);
 		b2dr = new Box2DDebugRenderer();
 		world.setContactListener(new MyContactListener());
 		
 		// Create main character
-		Vector2 startingPosition = level.instance().getStartingPosition(fromLeft);
-		stacy = new Stacy();
-		stacy.setPosition(startingPosition.x, startingPosition.y);
-		stacy.createPhysics(world);
-		if (fromLeft) stacy.faceRight(); else stacy.faceLeft();
+		stacy = new Stacy(world, startingPosX, startingPosY);
+		stacy.setJumping(DataThroughLevels.STACY_IS_JUMPING);
+		stacy.setJumpTime(DataThroughLevels.STACY_JUMP_TIME);
+		stacy.setState(DataThroughLevels.STACY_STATE);
+		stacy.setYVelocity(DataThroughLevels.STACY_Y_VELOCITY);
+		
+		if (faceRight) stacy.faceRight(); else stacy.faceLeft();
 		
 		// Add entities to stage
 		stage.addActor(stacy);
@@ -92,9 +96,17 @@ public class LevelScreen extends BaseScreen {
 		owpBodies = new Array<Body>();
 		map = level.instance().buildMap();
 		tmr = new OrthogonalTiledMapRenderer(map);
-		TiledObjectUtil.parseTiledObjectLayer(world, map.getLayers().get("collisions").getObjects());
+		// Parsing collisions
+		TiledObjectUtil.parseGround(world, map.getLayers().get("grounds").getObjects());
+		if (map.getLayers().get("walls") != null)
+			TiledObjectUtil.parseWall(world, map.getLayers().get("walls").getObjects());
+		if (map.getLayers().get("ceilings") != null)
+			TiledObjectUtil.parseCeiling(world, map.getLayers().get("ceilings").getObjects());
 		if (map.getLayers().get("owp") != null)
 			owpBodies = TiledObjectUtil.parseOneWayPlatforms(world, map.getLayers().get("owp").getObjects());
+		if (map.getLayers().get("death") != null)
+			TiledObjectUtil.parseDeathPoints(world, map.getLayers().get("death").getObjects());
+		// Particle effects
 		pe = new ParticleEffect();
 		level.instance().buildParticle(pe);
 		
@@ -108,6 +120,8 @@ public class LevelScreen extends BaseScreen {
 		hud = new Stage(new FitViewport(Constants.V_WIDTH, Constants.V_HEIGHT));
 		label = new Label("DEVELOPMENT BUILD", new LabelStyle(new BitmapFont(), Color.WHITE));
 		label.setPosition(Constants.V_WIDTH - 170, 10);
+		position = new Label("X: 999.9 Y: 999.9", new LabelStyle(new BitmapFont(), Color.WHITE));
+		position.setPosition(Constants.V_WIDTH - 120, Constants.V_HEIGHT - 25);
 		textbox = new Label("", new LabelStyle(new BitmapFont(), Color.WHITE));
 		
 		Table table = new Table();
@@ -118,6 +132,7 @@ public class LevelScreen extends BaseScreen {
 
 		hud.addActor(table);
 		hud.addActor(label);
+		hud.addActor(position);
 		
 		// Initialize camera position
 		float offset = stacy.isFacingRight() ? 0.75f : -0.75f;
@@ -256,12 +271,17 @@ public class LevelScreen extends BaseScreen {
 		game.cam.zoom = 0.5f;
 		tmr.setView(game.cam);
 		stage.act(delta);
-
+		
+		DataThroughLevels.STACY_X = stacy.getX();
+		DataThroughLevels.STACY_Y = stacy.getY();
+		
+		// Particle effects update
 		pe.update(delta);
 		if (pe.isComplete()) {
 			pe.reset();
 		}
 		
+		// Update Stacy during gameplay
 		if (interactionState == InteractionState.GAMEPLAY)
 			stacy.update(delta);
 		
@@ -295,6 +315,10 @@ public class LevelScreen extends BaseScreen {
 			targetPosY = MathUtils.clamp(targetPosY, game.cam.viewportHeight / 4f, map.getProperties().get("height", Integer.class) * map.getProperties().get("tileheight", Integer.class) - game.cam.viewportHeight / 4f);
 			game.cam.position.y = game.cam.position.y + (targetPosY - game.cam.position.y) * 0.03f;
 		}
+//		System.out.println("Cam: " + game.cam.position + " | Bounds: " + "(" +  game.cam.viewportWidth / 4f + ", " + (map.getProperties().get("width", Integer.class) * map.getProperties().get("tilewidth", Integer.class) - game.cam.viewportWidth / 4f) + "), (" + game.cam.viewportHeight / 4f + ", " + (map.getProperties().get("height", Integer.class) * map.getProperties().get("tileheight", Integer.class) - game.cam.viewportHeight / 4f) + ")");
+		
+		// Debug player position
+		position.setText(String.format("X: %.1f Y: %.1f", stacy.getX() + stacy.getWidth() / 2f, stacy.getY() + stacy.getHeight() / 2f));
 		
 		// Title and FPS counter
 		Gdx.graphics.setTitle(Constants.TITLE + " | FPS: " + Gdx.graphics.getFramesPerSecond());
@@ -302,20 +326,26 @@ public class LevelScreen extends BaseScreen {
 		// Textbox writer
 		writeTextBox(textboxBuffers);
 		
-		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-			textboxBuffers = new String[] {"You smell a relaxing scent from the shroom.", "However, you feel uncomfortable when you see it."};
-			showTextBox();
-		}
 		
-		if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
-			stacy.giveDamage(0, 50);
-		}
+		// Debug new features
+//		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+//			textboxBuffers = new String[] {"You smell a relaxing scent from the shroom.", "However, you feel uncomfortable when you see it."};
+//			showTextBox();
+//		}
+//		
+//		if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
+//			stacy.giveDamage(0, 50);
+//		}
 	}
 	
 	public void setTextboxStrings(String[] s) {
 		textboxBuffers = s;
 	}
-
+	
+	public Stacy getPlayer() {
+		return stacy;
+	}
+	
 	@Override
 	public void resize(int width, int height) {
 		stage.getViewport().update(width, height, false);

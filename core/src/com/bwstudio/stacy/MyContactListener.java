@@ -42,14 +42,15 @@ public class MyContactListener implements ContactListener {
 		
 		// Make Stacy fall when her head hit ceiling
 		if (a.getUserData().equals("head") &&
-			b.getUserData().equals("ground")) {
+			b.getUserData().equals("ceiling")) {
 			((Stacy) a.getBody().getFixtureList().first().getUserData()).setOnGround();
 		}
 		
 		if (b.getUserData().equals("head") &&
-			a.getUserData().equals("ground")) {
+			a.getUserData().equals("ceiling")) {
 			((Stacy) b.getBody().getFixtureList().first().getUserData()).setOnGround();
 		}
+		
 	}
 
 	@Override

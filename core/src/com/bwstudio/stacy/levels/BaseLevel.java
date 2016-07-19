@@ -13,9 +13,9 @@ public interface BaseLevel {
 	public TiledMap buildMap();
 	public void drawBackground(TiledMapRenderer tmr);
 	public void drawForeground(TiledMapRenderer tmr);
-	public Vector2 getStartingPosition(boolean fromLeft);
 	public Vector2 getYBounds();
 	public void buildParticle(ParticleEffect particleEffect);
 	public Array<Warp> buildWarpPoints(MyGame game);
+	public Vector2 offset();
 	
 }
