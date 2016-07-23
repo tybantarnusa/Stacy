@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="13" height="12" tilewidth="32" tileheight="32" nextobjectid="38">
+ <tileset firstgid="1" name="garden" tilewidth="32" tileheight="32" tilecount="66" columns="6">
+  <image source="garden.png" width="192" height="352"/>
+ </tileset>
+ <tileset firstgid="67" name="garden-env" tilewidth="32" tileheight="32" tilecount="168" columns="12">
+  <image source="garden-env.png" width="384" height="448"/>
+ </tileset>
+ <tileset firstgid="235" name="water" tilewidth="32" tileheight="32" tilecount="8" columns="4">
+  <image source="water.png" width="128" height="64"/>
+  <tile id="0">
+   <animation>
+    <frame tileid="0" duration="100"/>
+    <frame tileid="1" duration="100"/>
+    <frame tileid="2" duration="100"/>
+    <frame tileid="4" duration="100"/>
+    <frame tileid="5" duration="100"/>
+    <frame tileid="6" duration="100"/>
+   </animation>
+  </tile>
+ </tileset>
+ <layer name="bg" width="13" height="12">
+  <data encoding="csv">
+54,54,54,54,54,54,54,54,54,55,57,54,54,
+50,50,50,50,50,50,51,54,54,55,57,54,54,
+62,62,62,62,53,56,57,54,54,55,57,54,54,
+54,54,54,54,55,56,58,50,50,59,57,54,54,
+54,54,54,54,55,56,56,56,56,52,63,54,54,
+54,54,54,54,55,56,56,52,62,63,54,54,54,
+54,54,54,54,55,56,56,57,54,54,54,54,54,
+54,54,49,50,59,56,56,57,54,54,54,54,54,
+54,49,59,52,62,62,53,58,50,50,50,50,50,
+54,55,56,57,54,54,61,62,62,53,56,56,56,
+54,61,62,63,54,54,54,54,54,55,56,56,56,
+54,54,54,54,54,54,54,54,54,61,62,238,238
+</data>
+ </layer>
+ <layer name="col" width="13" height="12">
+  <data encoding="csv">
+45,45,45,45,45,45,45,38,39,0,0,40,23,
+0,0,0,0,0,0,0,40,39,65,0,40,23,
+0,0,0,0,0,0,0,47,48,0,0,40,23,
+46,46,46,42,0,0,0,0,0,0,64,40,23,
+23,23,23,39,0,0,0,0,0,0,0,40,23,
+23,23,23,39,65,66,0,0,0,0,41,44,23,
+23,37,45,48,0,0,0,0,41,46,44,23,23,
+37,48,0,0,0,0,0,64,47,45,45,45,45,
+39,0,0,0,0,0,0,0,0,0,0,0,0,
+39,0,0,0,41,42,0,0,0,0,0,0,0,
+39,0,0,0,40,43,46,46,42,0,0,0,0,
+43,46,46,46,44,23,23,23,39,0,63,41,46
+</data>
+ </layer>
+ <layer name="env" width="13" height="12">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,67,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,69,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,91,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer name="water" width="13" height="12">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,235,235,235,235,
+0,0,0,0,0,0,0,0,0,238,238,0,0
+</data>
+ </layer>
+ <objectgroup name="grounds">
+  <object id="3" x="0" y="96">
+   <polyline points="0,0 124,0"/>
+  </object>
+  <object id="5" x="324" y="160">
+   <polyline points="0,0 28,0"/>
+  </object>
+  <object id="6" x="260" y="192">
+   <polyline points="0,0 60,0"/>
+  </object>
+  <object id="7" x="32" y="352">
+   <polyline points="0,0 96,0"/>
+  </object>
+  <object id="8" x="131.996" y="288">
+   <polyline points="0,0 56.0039,0"/>
+  </object>
+  <object id="10" x="192" y="320">
+   <polyline points="0,0 96,0"/>
+  </object>
+  <object id="11" x="352" y="352">
+   <polyline points="0,0 64,0"/>
+  </object>
+ </objectgroup>
+ <objectgroup name="walls">
+  <object id="12" x="128" y="96">
+   <polyline points="0,0 0,128"/>
+  </object>
+  <object id="13" x="64" y="224">
+   <polyline points="0,0 0,32"/>
+  </object>
+  <object id="15" x="288" y="0">
+   <polyline points="0,0 0,96"/>
+  </object>
+  <object id="16" x="352" y="0">
+   <polyline points="0,0 0,160"/>
+  </object>
+  <object id="17" x="320" y="160">
+   <polyline points="0,0 0,32"/>
+  </object>
+  <object id="18" x="32" y="256">
+   <polyline points="0,0 0,96"/>
+  </object>
+  <object id="19" x="128" y="288">
+   <polyline points="0,0 0,64"/>
+  </object>
+  <object id="20" x="288" y="320">
+   <polyline points="0,0 0,64"/>
+  </object>
+  <object id="21" x="352" y="352">
+   <polyline points="0,0 0,32"/>
+  </object>
+  <object id="22" x="256" y="192">
+   <polyline points="0,0 0,64"/>
+  </object>
+  <object id="25" x="224" y="32">
+   <polyline points="0,0 0,64"/>
+  </object>
+  <object id="26" x="192" y="288">
+   <polyline points="0,0 0,32"/>
+  </object>
+ </objectgroup>
+ <objectgroup name="ceilings">
+  <object id="27" x="0" y="32">
+   <polyline points="0,0 224,0"/>
+  </object>
+  <object id="28" x="227.996" y="95.9922">
+   <polyline points="0,0 56,0.0078125"/>
+  </object>
+  <object id="29" x="64" y="224">
+   <polyline points="0,0 60,0"/>
+  </object>
+  <object id="30" x="32" y="256">
+   <polyline points="0,0 27.9961,0"/>
+  </object>
+  <object id="31" x="260" y="255.996">
+   <polyline points="0,0 156,0.00390625"/>
+  </object>
+ </objectgroup>
+ <objectgroup name="death">
+  <object id="32" x="288" y="368">
+   <polyline points="0,0 64,0"/>
+  </object>
+ </objectgroup>
+ <objectgroup name="owp">
+  <object id="33" x="288" y="32">
+   <polyline points="0,0 32,0"/>
+  </object>
+  <object id="34" x="320" y="96">
+   <polyline points="0,0 32,0"/>
+  </object>
+  <object id="35" x="128" y="160">
+   <polyline points="0,0 64,0"/>
+  </object>
+  <object id="36" x="224" y="224">
+   <polyline points="0,0 32,0"/>
+  </object>
+ </objectgroup>
+ <objectgroup name="lights">
+  <object id="37" x="240" y="208">
+   <ellipse/>
+  </object>
+ </objectgroup>
+</map>

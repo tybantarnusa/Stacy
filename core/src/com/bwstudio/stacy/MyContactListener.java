@@ -51,6 +51,17 @@ public class MyContactListener implements ContactListener {
 			((Stacy) b.getBody().getFixtureList().first().getUserData()).setOnGround();
 		}
 		
+		// Dead
+		if (a.getUserData() instanceof Stacy &&
+			b.getUserData().equals("death")) {
+			((Stacy) a.getUserData()).die();
+		}
+		
+		if (b.getUserData() instanceof Stacy &&
+			a.getUserData().equals("death")) {
+			((Stacy) b.getUserData()).die();
+		}
+		
 	}
 
 	@Override

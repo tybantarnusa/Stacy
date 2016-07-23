@@ -32,6 +32,9 @@ import com.bwstudio.stacy.actors.Stacy;
 import com.bwstudio.stacy.actors.Warp;
 import com.bwstudio.stacy.levels.Level;
 
+import box2dLight.PointLight;
+import box2dLight.RayHandler;
+
 public class LevelScreen extends BaseScreen {
 	
 	private Level level;
@@ -42,6 +45,9 @@ public class LevelScreen extends BaseScreen {
 	private World world;
 	private Box2DDebugRenderer b2dr;
 	
+	private RayHandler rayHandler;
+	private Array<Body> lights;
+	
 	private OrthogonalTiledMapRenderer tmr;
 	private TiledMap map;
 	private Array<Body> owpBodies;
@@ -51,6 +57,7 @@ public class LevelScreen extends BaseScreen {
 	private Stage hud;
 	private Label label;
 	private Label position;
+	private Label location;
 	private Label textbox;
 	private String[] textboxBuffers;
 	private int textboxBuffersIndex;
@@ -67,7 +74,7 @@ public class LevelScreen extends BaseScreen {
 		HIDE_TEXTBOX
 	}
 	
-	public LevelScreen(final MyGame game, Level level, float startingPosX, float startingPosY, boolean faceRight) {
+	public LevelScreen(final MyGame game, Level level, float startingPosX, float startingPosY) {
 		super(game, null);
 		
 		this.level = level;
@@ -86,7 +93,7 @@ public class LevelScreen extends BaseScreen {
 		stacy.setJumpTime(DataThroughLevels.STACY_JUMP_TIME);
 		stacy.setState(DataThroughLevels.STACY_STATE);
 		stacy.setYVelocity(DataThroughLevels.STACY_Y_VELOCITY);
-		
+		boolean faceRight = DataThroughLevels.STACT_FACING_RIGHT;
 		if (faceRight) stacy.faceRight(); else stacy.faceLeft();
 		
 		// Add entities to stage
@@ -116,12 +123,34 @@ public class LevelScreen extends BaseScreen {
 			warp.createPhysics(world);
 		}
 		
+		// Create lights
+		if (map.getLayers().get("lights") != null) {
+			lights = TiledObjectUtil.parseLights(world, map.getLayers().get("lights").getObjects());
+			rayHandler = new RayHandler(world);
+			rayHandler.setAmbientLight(0, 0, 0, 0.5f);
+			
+			for (Body light : lights) {
+				PointLight pLight = new PointLight(rayHandler, 128);
+				pLight.setColor(1, 1, 0, 0.9f);
+				float d = ((float) light.getUserData()) / Constants.PPM;
+				pLight.setDistance(d);
+				pLight.attachToBody(light);
+				if (d < 200 / Constants.PPM) {
+					pLight.setSoftnessLength(0.5f);
+				} else if (d < 300 / Constants.PPM) {
+					pLight.setSoftnessLength(1.2f);
+				}
+			}
+		}
+		
 		// Build HUD
 		hud = new Stage(new FitViewport(Constants.V_WIDTH, Constants.V_HEIGHT));
 		label = new Label("DEVELOPMENT BUILD", new LabelStyle(new BitmapFont(), Color.WHITE));
 		label.setPosition(Constants.V_WIDTH - 170, 10);
 		position = new Label("X: 999.9 Y: 999.9", new LabelStyle(new BitmapFont(), Color.WHITE));
 		position.setPosition(Constants.V_WIDTH - 120, Constants.V_HEIGHT - 25);
+		location = new Label(level.name(), new LabelStyle(new BitmapFont(), Color.WHITE));
+		location.setPosition(10, Constants.V_HEIGHT - 25);
 		textbox = new Label("", new LabelStyle(new BitmapFont(), Color.WHITE));
 		
 		Table table = new Table();
@@ -133,6 +162,7 @@ public class LevelScreen extends BaseScreen {
 		hud.addActor(table);
 		hud.addActor(label);
 		hud.addActor(position);
+		hud.addActor(location);
 		
 		// Initialize camera position
 		float offset = stacy.isFacingRight() ? 0.75f : -0.75f;
@@ -255,12 +285,18 @@ public class LevelScreen extends BaseScreen {
 		stage.draw();
 		level.instance().drawForeground(tmr);
 		
+		if (rayHandler != null) {
+			rayHandler.setCombinedMatrix(game.batch.getProjectionMatrix().cpy().scale(Constants.PPM, Constants.PPM, 0), 0, 0, Constants.V_WIDTH, Constants.V_HEIGHT);
+			rayHandler.updateAndRender();
+		}
+		
 		game.batch.begin();
 		pe.draw(game.batch);
 		hud.draw();
 		game.batch.end();
 		
-//		b2dr.render(world, game.batch.getProjectionMatrix().cpy().scale(Constants.PPM, Constants.PPM, 0));
+		if (Constants.DEBUG)
+			b2dr.render(world, game.batch.getProjectionMatrix().cpy().scale(Constants.PPM, Constants.PPM, 0));
 		
 		world.step(1/60f, 6, 2);
 	}
@@ -268,7 +304,8 @@ public class LevelScreen extends BaseScreen {
 	public void update(float delta) {
 		game.batch.setProjectionMatrix(game.cam.combined);
 		game.cam.update();
-		game.cam.zoom = 0.5f;
+		if (!Constants.DEBUG) game.cam.zoom = 0.5f;
+		else game.cam.zoom = 1f;
 		tmr.setView(game.cam);
 		stage.act(delta);
 		
@@ -284,6 +321,9 @@ public class LevelScreen extends BaseScreen {
 		// Update Stacy during gameplay
 		if (interactionState == InteractionState.GAMEPLAY)
 			stacy.update(delta);
+		if (stacy.isDead()) {
+			game.setScreen(new LevelScreen(game, Level.GARDEN_INNER_0, 239.5f, 123.5f));
+		}
 		
 		// One-Way Platforms
 		for (Body owp : owpBodies) {
@@ -311,11 +351,10 @@ public class LevelScreen extends BaseScreen {
 		if (level.instance().getYBounds() != null)
 			game.cam.position.y = MathUtils.clamp(game.cam.position.y, level.instance().getYBounds().x, level.instance().getYBounds().y);
 		else {
-			float targetPosY = (stacy.getBody().getTransform().getPosition().y + 0.5f) * Constants.PPM;
+			float targetPosY = (stacy.getBody().getTransform().getPosition().y) * Constants.PPM;
 			targetPosY = MathUtils.clamp(targetPosY, game.cam.viewportHeight / 4f, map.getProperties().get("height", Integer.class) * map.getProperties().get("tileheight", Integer.class) - game.cam.viewportHeight / 4f);
-			game.cam.position.y = game.cam.position.y + (targetPosY - game.cam.position.y) * 0.03f;
+			game.cam.position.y = game.cam.position.y + (targetPosY - game.cam.position.y) * 0.1f;
 		}
-//		System.out.println("Cam: " + game.cam.position + " | Bounds: " + "(" +  game.cam.viewportWidth / 4f + ", " + (map.getProperties().get("width", Integer.class) * map.getProperties().get("tilewidth", Integer.class) - game.cam.viewportWidth / 4f) + "), (" + game.cam.viewportHeight / 4f + ", " + (map.getProperties().get("height", Integer.class) * map.getProperties().get("tileheight", Integer.class) - game.cam.viewportHeight / 4f) + ")");
 		
 		// Debug player position
 		position.setText(String.format("X: %.1f Y: %.1f", stacy.getX() + stacy.getWidth() / 2f, stacy.getY() + stacy.getHeight() / 2f));
@@ -336,6 +375,10 @@ public class LevelScreen extends BaseScreen {
 //		if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
 //			stacy.giveDamage(0, 50);
 //		}
+		
+		if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
+			Constants.DEBUG = !Constants.DEBUG;
+		}
 	}
 	
 	public void setTextboxStrings(String[] s) {
@@ -349,6 +392,12 @@ public class LevelScreen extends BaseScreen {
 	@Override
 	public void resize(int width, int height) {
 		stage.getViewport().update(width, height, false);
+
+		int gutterW = stage.getViewport().getLeftGutterWidth();
+		int gutterH = stage.getViewport().getTopGutterHeight();
+		int rhWidth = width - (2 * gutterW);
+		int rhHeight = height - (2 * gutterH);
+		rayHandler.useCustomViewport(gutterW, gutterH, rhWidth, rhHeight);
 	}
 
 	@Override
@@ -376,6 +425,8 @@ public class LevelScreen extends BaseScreen {
 		
 		tmr.dispose();
 		map.dispose();
+		
+		if (rayHandler != null)	rayHandler.dispose();
 	}
 	
 }

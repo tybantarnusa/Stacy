@@ -1,6 +1,8 @@
 package com.bwstudio.stacy;
 
 public class Constants {
+	
+	public static boolean DEBUG = false;
 
 	// Game Configurations
 	public static String TITLE = "Stacy";

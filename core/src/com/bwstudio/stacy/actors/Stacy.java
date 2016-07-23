@@ -24,6 +24,8 @@ public class Stacy extends BaseActor {
 	private float minJumpHeight;
 	private float minJumpVelocity;
 	
+	private int health;
+	
 	private boolean facingRight;
 	private float walkingSpeed;
 	
@@ -69,7 +71,7 @@ public class Stacy extends BaseActor {
 		walkingSpeed = 1.65f;
 		hurtTime = 0;
 		state = State.IDLE;
-		
+		health = 10;
 		
 		// Initiate animations
 		timePassed = 0;
@@ -350,6 +352,19 @@ public class Stacy extends BaseActor {
 
 	public void setYVelocity(float yVelocity) {
 		body.setLinearVelocity(body.getLinearVelocity().x, yVelocity);
+	}
+	
+	public void die() {
+		health = 0;
+		state = State.HURT;
+	}
+	
+	public int getHealth() {
+		return health;
+	}
+	
+	public boolean isDead() {
+		return health == 0;
 	}
 	
 }

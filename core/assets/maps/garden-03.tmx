@@ -3,8 +3,8 @@
  <tileset firstgid="1" name="garden" tilewidth="32" tileheight="32" tilecount="66" columns="6">
   <image source="garden.png" width="192" height="352"/>
  </tileset>
- <tileset firstgid="67" name="garden-env" tilewidth="32" tileheight="32" tilecount="84" columns="12">
-  <image source="garden-env.png" width="384" height="224"/>
+ <tileset firstgid="67" name="garden-env" tilewidth="32" tileheight="32" tilecount="168" columns="12">
+  <image source="garden-env.png" width="384" height="448"/>
  </tileset>
  <layer name="sky" width="21" height="10">
   <data encoding="csv">
@@ -31,7 +31,7 @@
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,
 14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+54,54,54,54,54,54,54,54,54,54,54,54,54,54,54,54,54,54,54,54,54
 </data>
  </layer>
  <layer name="col" width="21" height="10">
@@ -42,7 +42,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,73,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,79,0,0,0,83,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,83,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,104,105,106,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22
@@ -68,11 +68,20 @@
   </object>
  </objectgroup>
  <objectgroup name="owp">
-  <object id="4" x="295" y="244.875">
-   <polyline points="0,0 79.625,0.25"/>
+  <object id="3" x="272" y="272">
+   <polyline points="0,0 128,0"/>
   </object>
-  <object id="7" x="304" y="223.875">
-   <polyline points="0,0 63.875,0"/>
+  <object id="5" x="295.004" y="245">
+   <polyline points="0,0 81.9961,0"/>
+  </object>
+  <object id="6" x="304" y="224">
+   <polyline points="0,0 64,0"/>
+  </object>
+ </objectgroup>
+ <objectgroup name="lights"/>
+ <objectgroup name="walls">
+  <object id="7" x="672" y="320">
+   <polyline points="0,0 0,-320"/>
   </object>
  </objectgroup>
 </map>

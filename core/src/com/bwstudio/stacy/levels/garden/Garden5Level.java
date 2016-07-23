@@ -12,14 +12,14 @@ import com.bwstudio.stacy.actors.Warp;
 import com.bwstudio.stacy.levels.BaseLevel;
 import com.bwstudio.stacy.levels.Level;
 
-public class Garden1Level implements BaseLevel {
+public class Garden5Level implements BaseLevel {
 
 	@Override
 	public TiledMap buildMap() {
 		TmxMapLoader.Parameters par = new TmxMapLoader.Parameters();
 		par.textureMinFilter = TextureFilter.Linear;
 		par.textureMinFilter = TextureFilter.Nearest;
-		return new TmxMapLoader().load("maps/garden-01.tmx", par);
+		return new TmxMapLoader().load("maps/garden-04.tmx");
 	}
 	
 	@Override
@@ -29,7 +29,7 @@ public class Garden1Level implements BaseLevel {
 
 	@Override
 	public void drawForeground(TiledMapRenderer tmr) {
-		tmr.render(new int[] {2, 3, 4});
+		tmr.render(new int[] {2, 3});
 	}
 
 	@Override
@@ -44,9 +44,10 @@ public class Garden1Level implements BaseLevel {
 	public Array<Warp> buildWarpPoints(MyGame game) {
 		Array<Warp> warps = new Array<Warp>();
 
-		Warp warp = new Warp(game, -25, 64, 1, 2, Level.GARDEN_INNER_0, 636, -1111, 114.5f - 50.5f);
+		Warp warp = new Warp(game, -25, 64, Level.GARDEN_INNER_1, 410, -1111, 0);
 		warps.add(warp);
-		warp = new Warp(game, 665, 320, 1, 4, Level.GARDEN_2, 5, -1111, 82.5f - 274.5f);
+		
+		warp = new Warp(game, -25, 128, Level.GARDEN_INNER_1, 410, -1111, 0);
 		warps.add(warp);
 		
 		return warps;

@@ -13,6 +13,7 @@ public class DesktopLauncher {
 		config.height = (int) Constants.V_HEIGHT;
 		config.title = Constants.TITLE;
 		config.resizable = false;
+		config.vSyncEnabled = true;
 		new LwjglApplication(new MyGame(), config);
 	}
 }

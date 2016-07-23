@@ -1,6 +1,7 @@
 package com.bwstudio.stacy.levels.garden;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
@@ -17,6 +18,9 @@ public class InnerGarden0Level implements BaseLevel {
 
 	@Override
 	public TiledMap buildMap() {
+		TmxMapLoader.Parameters par = new TmxMapLoader.Parameters();
+		par.textureMinFilter = TextureFilter.Linear;
+		par.textureMinFilter = TextureFilter.Nearest;
 		return new TmxMapLoader().load("maps/garden-inner-00.tmx");
 	}
 	
@@ -44,15 +48,10 @@ public class InnerGarden0Level implements BaseLevel {
 	public Array<Warp> buildWarpPoints(MyGame game) {
 		Array<Warp> warps = new Array<Warp>();
 
-		Warp warp = new Warp(game, 665, 125, 1, 2, Level.GARDEN_1, 5.45f, 50.5f, true);
+		Warp warp = new Warp(game, 665, 125, 1, 2, Level.GARDEN_1, 5.45f, -1111, 50.5f - 114.5f);
 		warps.add(warp);
 		
 		return warps;
-	}
-
-	@Override
-	public Vector2 offset() {
-		return new Vector2(0, 63);
 	}
 
 }

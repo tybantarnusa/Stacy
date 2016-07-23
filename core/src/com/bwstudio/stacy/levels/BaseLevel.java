@@ -16,6 +16,5 @@ public interface BaseLevel {
 	public Vector2 getYBounds();
 	public void buildParticle(ParticleEffect particleEffect);
 	public Array<Warp> buildWarpPoints(MyGame game);
-	public Vector2 offset();
 	
 }

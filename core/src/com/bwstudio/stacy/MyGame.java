@@ -16,7 +16,7 @@ public class MyGame extends Game {
 	public void create () {
 		batch = new SpriteBatch();
 		cam = new OrthographicCamera(Constants.V_WIDTH, Constants.V_HEIGHT);
-		setScreen(new LevelScreen(this, Level.GARDEN_INNER_0, 32 * 3, 32 * 4, true));
+		setScreen(new LevelScreen(this, Level.GARDEN_4, 617.5f, 82.5f));
 
 		Strings.buildLanguage();
 	}
