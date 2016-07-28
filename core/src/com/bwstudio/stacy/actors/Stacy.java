@@ -15,6 +15,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.bwstudio.stacy.Constants;
 import com.bwstudio.stacy.DataThroughLevels;
+import com.bwstudio.stacy.screens.LevelScreen;
 
 public class Stacy extends BaseActor {
 	
@@ -325,6 +326,7 @@ public class Stacy extends BaseActor {
 		hurtTime = Math.abs(knockback) < 100 ? 0.5f : 0.5f;
 		body.setLinearVelocity(0, 0);
 		body.applyForceToCenter(knockback, Math.abs(knockback) * 1.5f, true);
+		LevelScreen.shake = 1f;
 	}
 	
 	public void dispose() {

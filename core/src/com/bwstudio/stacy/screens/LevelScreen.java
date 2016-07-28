@@ -69,6 +69,8 @@ public class LevelScreen extends BaseScreen {
 	
 	private InteractionState interactionState;
 	
+	public static float shake;
+	
 	private enum InteractionState {
 		GAMEPLAY,
 		INIT_TEXTBOX,
@@ -189,6 +191,8 @@ public class LevelScreen extends BaseScreen {
 			targetPosY = MathUtils.clamp(targetPosY, game.cam.viewportHeight / 4f, map.getProperties().get("height", Integer.class) * map.getProperties().get("tileheight", Integer.class) - game.cam.viewportHeight / 4f);
 			game.cam.position.y = targetPosY;
 		}
+		
+		shake = 0;
 	}
 	
 	private void showTextBox() {
@@ -372,14 +376,18 @@ public class LevelScreen extends BaseScreen {
 		float offset = stacy.isFacingRight() ? 0.75f : -0.75f;
 		float targetPosX = (stacy.getBody().getTransform().getPosition().x + offset) * Constants.PPM;
 		targetPosX = MathUtils.clamp(targetPosX, game.cam.viewportWidth / 4f, map.getProperties().get("width", Integer.class) * map.getProperties().get("tilewidth", Integer.class) - game.cam.viewportWidth / 4f);
-		game.cam.position.x = game.cam.position.x + (targetPosX - game.cam.position.x) * 0.03f;
+		game.cam.position.x = game.cam.position.x + (targetPosX - game.cam.position.x) * 0.03f + MathUtils.random(-shake, shake);
 		if (level.instance().getYBounds() != null)
 			game.cam.position.y = MathUtils.clamp(game.cam.position.y, level.instance().getYBounds().x, level.instance().getYBounds().y);
 		else {
 			float targetPosY = (stacy.getBody().getTransform().getPosition().y) * Constants.PPM;
 			targetPosY = MathUtils.clamp(targetPosY, game.cam.viewportHeight / 4f, map.getProperties().get("height", Integer.class) * map.getProperties().get("tileheight", Integer.class) - game.cam.viewportHeight / 4f);
-			game.cam.position.y = game.cam.position.y + (targetPosY - game.cam.position.y) * 0.1f;
+			game.cam.position.y = game.cam.position.y + (targetPosY - game.cam.position.y) * 0.1f + MathUtils.random(-shake, shake);
 		}
+		
+		if (shake > 0) shake -= delta;
+		if (shake < 0.5f) shake = 0;
+		System.out.println(shake);
 		
 		// Debug player position
 		position.setText(String.format("X: %.1f Y: %.1f", stacy.getX() + stacy.getWidth() / 2f, stacy.getY() + stacy.getHeight() / 2f));
