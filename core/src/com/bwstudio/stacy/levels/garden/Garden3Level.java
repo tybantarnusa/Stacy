@@ -47,8 +47,8 @@ public class Garden3Level implements BaseLevel {
 		Warp warp = new Warp(game, -32 + 8, 32 * 5, 1, 10, Level.GARDEN_4, 639.5f, -1111, 82.5f - 50.5f);
 		warps.add(warp);
 		
-//		warp = new Warp(game, -25, 128, Level.GARDEN_3, 410, -1111, 0);
-//		warps.add(warp);
+		warp = new Warp(game, 32 * 30 - 8, 32 * 5, 1, 10, Level.GARDEN_5, 3, -1111, 82.5f - 50.5f);
+		warps.add(warp);
 		
 		return warps;
 	}

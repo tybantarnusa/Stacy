@@ -5,6 +5,9 @@ import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
+import com.bwstudio.stacy.actors.Bullet;
+import com.bwstudio.stacy.actors.Enemy;
+import com.bwstudio.stacy.actors.Enemy1;
 import com.bwstudio.stacy.actors.Stacy;
 import com.bwstudio.stacy.actors.Warp;
 
@@ -62,6 +65,46 @@ public class MyContactListener implements ContactListener {
 			((Stacy) b.getUserData()).die();
 		}
 		
+		// Enemy
+		if (a.getUserData() instanceof Stacy &&
+			b.getUserData() instanceof Enemy) {
+			Stacy s = ((Stacy) a.getUserData());
+			s.giveDamage(0, s.isFacingRight() ? -50 : 50);
+		}
+		
+		if (b.getUserData() instanceof Stacy &&
+			a.getUserData() instanceof Enemy) {
+			Stacy s = ((Stacy) b.getUserData());
+			s.giveDamage(0, s.isFacingRight() ? -50 : 50);
+		}
+		
+		if (a.getUserData() instanceof Stacy &&
+			b.getUserData().equals("enemy1 sight")) {
+			Enemy1 e = ((Enemy1) b.getBody().getFixtureList().get(0).getUserData());
+			e.attack((Stacy) a.getUserData());
+		}
+		
+		if (b.getUserData() instanceof Stacy &&
+			a.getUserData().equals("enemy1 sight")) {
+			Enemy1 e = ((Enemy1) a.getBody().getFixtureList().get(0).getUserData());
+			e.attack((Stacy) b.getUserData());
+		}
+		
+		if (a.getUserData() instanceof Stacy &&
+			b.getUserData() instanceof Bullet) {
+			Stacy s = (Stacy) a.getUserData();
+			Bullet p = (Bullet) b.getUserData();
+			s.giveDamage(0, p.knockbackForce());
+			p.destroy();
+		}
+		
+		if (b.getUserData() instanceof Stacy &&
+			a.getUserData() instanceof Bullet) {
+			Stacy s = (Stacy) a.getUserData();
+			Bullet p = (Bullet) b.getUserData();
+			s.giveDamage(0, p.knockbackForce());
+			p.destroy();
+		}
 	}
 
 	@Override
@@ -75,12 +118,26 @@ public class MyContactListener implements ContactListener {
 		// Off Ground
 		if (a.getUserData().equals("foot") &&
 			b.getUserData().equals("ground")) {
-			((Stacy) a.getBody().getFixtureList().first().getUserData()).setOffGround();
+			Stacy s = ((Stacy) a.getBody().getFixtureList().first().getUserData());
+			if (s.getState() != Stacy.State.HURT) s.setOffGround();
 		}
 		
 		if (b.getUserData().equals("foot") &&
 			a.getUserData().equals("ground")) {
-			((Stacy) b.getBody().getFixtureList().first().getUserData()).setOffGround();
+			Stacy s = ((Stacy) b.getBody().getFixtureList().first().getUserData());
+			if (s.getState() != Stacy.State.HURT) s.setOffGround();
+		}
+		
+		if (a.getUserData() instanceof Stacy &&
+			b.getUserData().equals("enemy1 sight")) {
+			Enemy1 e = ((Enemy1) b.getBody().getFixtureList().get(0).getUserData());
+			e.setState(Enemy1.State.STAY_STILL);
+		}
+		
+		if (b.getUserData() instanceof Stacy &&
+			a.getUserData().equals("enemy1 sight")) {
+			Enemy1 e = ((Enemy1) a.getBody().getFixtureList().get(0).getUserData());
+			e.setState(Enemy1.State.STAY_STILL);
 		}
 	}
 

@@ -164,7 +164,7 @@ public class Stacy extends BaseActor {
 	    
 	    // Jump
 //	    body.setLinearVelocity(body.getLinearVelocity().x, body.getLinearVelocity().y * 0.9f);
-	    if (body.getLinearVelocity().y != 0) {
+	    if (body.getLinearVelocity().y != 0 && state != State.HURT) {
 	    	state = State.JUMP;
 	    }
 	    
@@ -272,7 +272,14 @@ public class Stacy extends BaseActor {
 		fixture.setUserData(this);
 		
 		// Foot Sensor
-		shape.set(new float[] {-(getWidth() / 2f - 13f) / Constants.PPM, -(getHeight() / 2f - 3f) / Constants.PPM, (getWidth() / 2f - 13f) / Constants.PPM, -(getHeight() / 2f - 3f) / Constants.PPM, getWidth() / 2f / Constants.PPM - 13f / Constants.PPM, -(getHeight() / 2f + 2f) / Constants.PPM, -(getWidth() / 2f - 13f) / Constants.PPM, -(getHeight() / 2f + 2f) / Constants.PPM});
+		shape.set(new float[] { -(getWidth() / 2f - 4f) / Constants.PPM,
+								-(getHeight() / 2f + 15f) / Constants.PPM,
+								(getWidth() / 2f - 4f) / Constants.PPM,
+								-(getHeight() / 2f + 15f) / Constants.PPM,
+								(getWidth() / 2f - 4f) / Constants.PPM,
+								-(getHeight() / 2f + 20f) / Constants.PPM,
+								-(getWidth() / 2f - 4f) / Constants.PPM,
+								-(getHeight() / 2f + 20f) / Constants.PPM});
 		fdef.shape = shape;
 		fdef.isSensor = true;
 		body.createFixture(fdef).setUserData("foot");
@@ -315,8 +322,9 @@ public class Stacy extends BaseActor {
 	
 	public void giveDamage(int amount, float knockback) {
 		state = State.HURT;
-		hurtTime = knockback < 100 ? 0.3f : 0.5f;
-		body.applyForceToCenter(facingRight ? -knockback : knockback, knockback * 1.5f, true);
+		hurtTime = Math.abs(knockback) < 100 ? 0.5f : 0.5f;
+		body.setLinearVelocity(0, 0);
+		body.applyForceToCenter(knockback, Math.abs(knockback) * 1.5f, true);
 	}
 	
 	public void dispose() {

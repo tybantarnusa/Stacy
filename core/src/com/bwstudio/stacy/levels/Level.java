@@ -4,6 +4,7 @@ import com.bwstudio.stacy.levels.garden.Garden1Level;
 import com.bwstudio.stacy.levels.garden.Garden2Level;
 import com.bwstudio.stacy.levels.garden.Garden3Level;
 import com.bwstudio.stacy.levels.garden.Garden4Level;
+import com.bwstudio.stacy.levels.garden.Garden5Level;
 import com.bwstudio.stacy.levels.garden.InnerGarden0Level;
 import com.bwstudio.stacy.levels.garden.InnerGarden1Level;
 import com.bwstudio.stacy.levels.garden.InnerGarden2Level;
@@ -12,6 +13,7 @@ import com.bwstudio.stacy.levels.garden.InnerGarden4Level;
 import com.bwstudio.stacy.levels.garden.InnerGarden5Level;
 import com.bwstudio.stacy.levels.garden.InnerGarden6Level;
 import com.bwstudio.stacy.levels.garden.InnerGarden7Level;
+import com.bwstudio.stacy.screens.LevelScreen;
 
 public enum Level {
 	GARDEN_INNER_0(new InnerGarden0Level()),
@@ -25,7 +27,8 @@ public enum Level {
 	GARDEN_1(new Garden1Level()),
 	GARDEN_2(new Garden2Level()),
 	GARDEN_3(new Garden3Level()),
-	GARDEN_4(new Garden4Level());
+	GARDEN_4(new Garden4Level()),
+	GARDEN_5(new Garden5Level());
 	
 	private final BaseLevel instance;
 	

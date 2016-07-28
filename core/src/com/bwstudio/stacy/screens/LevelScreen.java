@@ -1,5 +1,7 @@
 package com.bwstudio.stacy.screens;
 
+import java.util.Iterator;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
@@ -28,6 +30,8 @@ import com.bwstudio.stacy.DataThroughLevels;
 import com.bwstudio.stacy.MyContactListener;
 import com.bwstudio.stacy.MyGame;
 import com.bwstudio.stacy.TiledObjectUtil;
+import com.bwstudio.stacy.actors.Enemy;
+import com.bwstudio.stacy.actors.Enemy1;
 import com.bwstudio.stacy.actors.Stacy;
 import com.bwstudio.stacy.actors.Warp;
 import com.bwstudio.stacy.levels.Level;
@@ -40,6 +44,7 @@ public class LevelScreen extends BaseScreen {
 	private Level level;
 	
 	private Stacy stacy;
+	private Array<Enemy> enemies;
 	private Array<Warp> warps;
 	
 	private World world;
@@ -96,8 +101,16 @@ public class LevelScreen extends BaseScreen {
 		boolean faceRight = DataThroughLevels.STACT_FACING_RIGHT;
 		if (faceRight) stacy.faceRight(); else stacy.faceLeft();
 		
-		// Add entities to stage
+		enemies = new Array<Enemy>();
+		
+		Enemy1 enemy = new Enemy1();
+		enemy.setPosition(755, 50.5f);
+		enemy.createPhysics(world);
+		enemies.add(enemy);
+		
+		// Add entities to 
 		stage.addActor(stacy);
+		stage.addActor(enemy);
 		
 		// Build map
 		owpBodies = new Array<Body>();
@@ -274,6 +287,7 @@ public class LevelScreen extends BaseScreen {
 		pe.scaleEffect(0.5f);
 		pe.start();
 	}
+	
 
 	@Override
 	public void render(float delta) {
@@ -299,13 +313,24 @@ public class LevelScreen extends BaseScreen {
 			b2dr.render(world, game.batch.getProjectionMatrix().cpy().scale(Constants.PPM, Constants.PPM, 0));
 		
 		world.step(1/60f, 6, 2);
+		
+		Array<Body> bodies = new Array<Body>();
+		world.getBodies(bodies);
+		for (Iterator<Body> i = bodies.iterator(); i.hasNext();) {
+			Body body = i.next();
+			if (body != null && body.getUserData() != null && body.getUserData().equals("destroy")) {
+				world.destroyBody(body);
+				body.setUserData(null);
+				body = null;
+			}
+		}
 	}
 	
 	public void update(float delta) {
 		game.batch.setProjectionMatrix(game.cam.combined);
 		game.cam.update();
 		if (!Constants.DEBUG) game.cam.zoom = 0.5f;
-		else game.cam.zoom = 1f;
+		else game.cam.zoom = 0.5f;
 		tmr.setView(game.cam);
 		stage.act(delta);
 		
@@ -371,10 +396,6 @@ public class LevelScreen extends BaseScreen {
 //			textboxBuffers = new String[] {"You smell a relaxing scent from the shroom.", "However, you feel uncomfortable when you see it."};
 //			showTextBox();
 //		}
-//		
-//		if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
-//			stacy.giveDamage(0, 50);
-//		}
 		
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
 			Constants.DEBUG = !Constants.DEBUG;
@@ -412,7 +433,6 @@ public class LevelScreen extends BaseScreen {
 
 	@Override
 	public void hide() {
-		
 	}
 
 	@Override

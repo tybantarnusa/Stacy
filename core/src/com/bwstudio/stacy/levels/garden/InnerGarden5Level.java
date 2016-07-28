@@ -30,7 +30,7 @@ public class InnerGarden5Level implements BaseLevel {
 
 	@Override
 	public void drawForeground(TiledMapRenderer tmr) {
-		tmr.render(new int[] {1});
+		tmr.render(new int[] {1, 2});
 	}
 
 	@Override

@@ -19,17 +19,17 @@ public class Garden5Level implements BaseLevel {
 		TmxMapLoader.Parameters par = new TmxMapLoader.Parameters();
 		par.textureMinFilter = TextureFilter.Linear;
 		par.textureMinFilter = TextureFilter.Nearest;
-		return new TmxMapLoader().load("maps/garden-04.tmx");
+		return new TmxMapLoader().load("maps/garden-05.tmx");
 	}
 	
 	@Override
 	public void drawBackground(TiledMapRenderer tmr) {
-		tmr.render(new int[] {0, 1});
+		tmr.render(new int[] {0, 1, 2});
 	}
 
 	@Override
 	public void drawForeground(TiledMapRenderer tmr) {
-		tmr.render(new int[] {2, 3});
+		tmr.render(new int[] {3, 4});
 	}
 
 	@Override
@@ -44,10 +44,7 @@ public class Garden5Level implements BaseLevel {
 	public Array<Warp> buildWarpPoints(MyGame game) {
 		Array<Warp> warps = new Array<Warp>();
 
-		Warp warp = new Warp(game, -25, 64, Level.GARDEN_INNER_1, 410, -1111, 0);
-		warps.add(warp);
-		
-		warp = new Warp(game, -25, 128, Level.GARDEN_INNER_1, 410, -1111, 0);
+		Warp warp = new Warp(game, -32 + 8, 32 * 6, 1, 8, Level.GARDEN_3, 928, -1111, 50.5f - 82.5f);
 		warps.add(warp);
 		
 		return warps;
