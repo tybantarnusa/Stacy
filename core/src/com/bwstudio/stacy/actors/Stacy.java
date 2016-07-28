@@ -40,6 +40,10 @@ public class Stacy extends BaseActor {
 	private Animation runAnimationL;
 	private Animation hurtR;
 	private Animation hurtL;
+	private Animation jumpL;
+	private Animation jumpR;
+	private Animation fallL;
+	private Animation fallR;
 	private Animation currentAnimation;
 	
 	private float hurtTime;
@@ -129,6 +133,32 @@ public class Stacy extends BaseActor {
 		hurtL = new Animation(0.07f, mirror);
 		hurtL.setPlayMode(PlayMode.LOOP);
 		
+		// Jump
+		texture = new Texture("chars/stacy/stacy_jump.png");
+		texture.setFilter(TextureFilter.Linear, TextureFilter.Nearest);
+		frames = new TextureRegion(texture).split(36, 39)[0];
+		mirror = new TextureRegion(texture).split(36, 39)[0];
+		for(TextureRegion m : mirror) {
+			m.flip(true, false);
+		}
+		jumpR = new Animation(0.07f, frames);
+		jumpR.setPlayMode(PlayMode.NORMAL);
+		jumpL = new Animation(0.07f, mirror);
+		jumpL.setPlayMode(PlayMode.NORMAL);
+			
+		// Hurt
+		texture = new Texture("chars/stacy/stacy_fall.png");
+		texture.setFilter(TextureFilter.Linear, TextureFilter.Nearest);
+		frames = new TextureRegion(texture).split(36, 39)[0];
+		mirror = new TextureRegion(texture).split(36, 39)[0];
+		for(TextureRegion m : mirror) {
+			m.flip(true, false);
+		}
+		fallR = new Animation(0.07f, frames);
+		fallR.setPlayMode(PlayMode.LOOP);
+		fallL = new Animation(0.07f, mirror);
+		fallL.setPlayMode(PlayMode.LOOP);	
+		
 		currentAnimation = idleAnimationR;
 		setBounds(0, 0, 32, 39);
 		setSize(32, 39);
@@ -152,8 +182,13 @@ public class Stacy extends BaseActor {
 	    	currentAnimation = facingRight ? idleAnimationR : idleAnimationL;
 	    }
 	    
-	    if (body.getLinearVelocity().y == 0 && state == State.JUMP) {
-	    	state = State.IDLE;
+	    if (state == State.JUMP) {
+	    	if (body.getLinearVelocity().y > 0)
+	    		currentAnimation = facingRight ? jumpR : jumpL;
+	    	else if (body.getLinearVelocity().y < 0)
+	    		currentAnimation = facingRight ? fallR : fallL;
+    		else
+    			state = State.IDLE;
 	    }
 	    
 	    if (hurtTime > 0) {
@@ -219,6 +254,7 @@ public class Stacy extends BaseActor {
 	
 			if (Gdx.input.isKeyJustPressed(Input.Keys.UP) && state != State.JUMP) {
 				jumpTime = maxJumpTime;
+				timePassed = 0;
 				state = State.JUMP;
 			}
 			
@@ -228,6 +264,7 @@ public class Stacy extends BaseActor {
 				jumpTime -= delta;
 			} else if (isJumping) {
 				isJumping = false;
+				timePassed = 0;
 //				body.setLinearVelocity(0, jumpHeight / 2f / Constants.PPM);
 			}
 
@@ -323,7 +360,10 @@ public class Stacy extends BaseActor {
 	
 	public void giveDamage(int amount, float knockback) {
 		state = State.HURT;
-		hurtTime = Math.abs(knockback) < 100 ? 0.5f : 0.5f;
+		hurtTime = 0.5f;
+		
+		if (knockback < 0) faceRight(); else faceLeft();
+		
 		body.setLinearVelocity(0, 0);
 		body.applyForceToCenter(knockback, Math.abs(knockback) * 1.5f, true);
 		LevelScreen.shake = 1f;

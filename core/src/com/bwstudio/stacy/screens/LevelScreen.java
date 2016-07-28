@@ -164,8 +164,8 @@ public class LevelScreen extends BaseScreen {
 		label.setPosition(Constants.V_WIDTH - 170, 10);
 		position = new Label("X: 999.9 Y: 999.9", new LabelStyle(new BitmapFont(), Color.WHITE));
 		position.setPosition(Constants.V_WIDTH - 120, Constants.V_HEIGHT - 25);
-		location = new Label(level.name(), new LabelStyle(new BitmapFont(), Color.WHITE));
-		location.setPosition(10, Constants.V_HEIGHT - 25);
+		location = new Label(level.name() + "\nPress F3 to toggle debug mode.", new LabelStyle(new BitmapFont(), Color.WHITE));
+		location.setPosition(10, Constants.V_HEIGHT - 45);
 		textbox = new Label("", new LabelStyle(new BitmapFont(), Color.WHITE));
 		
 		Table table = new Table();
@@ -195,7 +195,8 @@ public class LevelScreen extends BaseScreen {
 		shake = 0;
 	}
 	
-	private void showTextBox() {
+	private void showTextBox(String[] strings) {
+		textboxBuffers = strings;
 		if (interactionState == InteractionState.GAMEPLAY) {
 			stacy.setIdle();
 			textboxBuffersIndex = 0;
@@ -310,7 +311,7 @@ public class LevelScreen extends BaseScreen {
 		
 		game.batch.begin();
 		pe.draw(game.batch);
-		hud.draw();
+		if (Constants.DEBUG) hud.draw();
 		game.batch.end();
 		
 		if (Constants.DEBUG)
@@ -400,10 +401,9 @@ public class LevelScreen extends BaseScreen {
 		
 		
 		// Debug new features
-//		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-//			textboxBuffers = new String[] {"You smell a relaxing scent from the shroom.", "However, you feel uncomfortable when you see it."};
-//			showTextBox();
-//		}
+		if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+			showTextBox(new String[] {"You smell a relaxing scent from the shroom.", "However, you feel uncomfortable when you see it."});
+		}
 		
 		if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
 			Constants.DEBUG = !Constants.DEBUG;
