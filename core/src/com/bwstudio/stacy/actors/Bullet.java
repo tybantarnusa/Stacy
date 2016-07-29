@@ -1,8 +1,11 @@
 package com.bwstudio.stacy.actors;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
@@ -14,21 +17,27 @@ import com.bwstudio.stacy.Constants;
 
 public class Bullet extends BaseActor {
 
-	private TextureRegion tex;
 	private Vector2 direction;
 	private float force;
 	private float lifeTime;
+	private Animation animation;
 	
 	public Bullet(float x, float y, BaseActor target, World world) {
-		tex = new TextureRegion(new Texture("super_awesome_bullet_placeholder.png"));
-		setSize(16, 16);
-		setBounds(0, 0, 16, 16);
+		setSize(22, 22);
+		setBounds(0, 0, 22, 22);
 		
 		setPosition(x, y);
 		
 		direction = new Vector2(target.getX(Align.center) - x, target.getY(Align.center) - y).nor();
 		force = 90;
 		lifeTime = 0;
+		
+		Texture texture = new Texture("things/bulletfire.png");
+		texture.setFilter(TextureFilter.Linear, TextureFilter.Nearest);
+		TextureRegion[] frames = new TextureRegion(texture).split(22, 22)[0];
+		animation = new Animation(0.2f, frames);
+		animation.setPlayMode(PlayMode.LOOP);
+		
 		createPhysics(world);
 	}
 	
@@ -45,7 +54,7 @@ public class Bullet extends BaseActor {
 	
 	@Override
 	public void draw(Batch batch, float parentAlpha){
-	    TextureRegion currentFrame = tex;
+	    TextureRegion currentFrame = animation.getKeyFrame(lifeTime);
 	    batch.draw(currentFrame, getX(), getY(), getWidth(), getHeight());
 	}
 
@@ -83,7 +92,7 @@ public class Bullet extends BaseActor {
 	
 	@Override
 	public void dispose() {
-		tex.getTexture().dispose();
+		animation.getKeyFrames()[0].getTexture().dispose();
 	}
 
 	@Override
