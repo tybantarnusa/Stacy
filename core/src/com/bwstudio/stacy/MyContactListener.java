@@ -105,6 +105,18 @@ public class MyContactListener implements ContactListener {
 			s.giveDamage(0, p.knockbackForce());
 			p.destroy();
 		}
+		
+		if (a.getFilterData().categoryBits == Constants.BIT_OBSTACLE &&
+			b.getUserData() instanceof Bullet) {
+			Bullet p = (Bullet) b.getUserData();
+			p.destroy();
+		}
+		
+		if (b.getFilterData().categoryBits == Constants.BIT_OBSTACLE &&
+			a.getUserData() instanceof Bullet) {
+			Bullet p = (Bullet) b.getUserData();
+			p.destroy();
+		}
 	}
 
 	@Override

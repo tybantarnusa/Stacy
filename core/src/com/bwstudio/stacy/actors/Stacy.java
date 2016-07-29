@@ -29,6 +29,7 @@ public class Stacy extends BaseActor {
 	
 	private boolean facingRight;
 	private float walkingSpeed;
+	private ShieldEntity shield;
 	
 	// Animations
 	private float timePassed;
@@ -44,6 +45,8 @@ public class Stacy extends BaseActor {
 	private Animation jumpR;
 	private Animation fallL;
 	private Animation fallR;
+	private Animation mirrorL;
+	private Animation mirrorR;
 	private Animation currentAnimation;
 	
 	private float hurtTime;
@@ -55,9 +58,16 @@ public class Stacy extends BaseActor {
 		RUN,
 		STOP_RUN,
 		JUMP,
-		HURT
+		HURT,
+		SHIELD
+	}
+	
+	private enum Shield {
+		NONE,
+		MIRROR
 	}
 	private State state;
+	private Shield selectedShield;
 	
 	public Stacy(World world, float startingPosX, float startingPosY) {
 		super();
@@ -77,6 +87,8 @@ public class Stacy extends BaseActor {
 		hurtTime = 0;
 		state = State.IDLE;
 		health = 10;
+		shield = null;
+		selectedShield = Shield.NONE;
 		
 		// Initiate animations
 		timePassed = 0;
@@ -146,7 +158,7 @@ public class Stacy extends BaseActor {
 		jumpL = new Animation(0.07f, mirror);
 		jumpL.setPlayMode(PlayMode.NORMAL);
 			
-		// Hurt
+		// Fall
 		texture = new Texture("chars/stacy/stacy_fall.png");
 		texture.setFilter(TextureFilter.Linear, TextureFilter.Nearest);
 		frames = new TextureRegion(texture).split(36, 39)[0];
@@ -157,9 +169,23 @@ public class Stacy extends BaseActor {
 		fallR = new Animation(0.07f, frames);
 		fallR.setPlayMode(PlayMode.LOOP);
 		fallL = new Animation(0.07f, mirror);
-		fallL.setPlayMode(PlayMode.LOOP);	
+		fallL.setPlayMode(PlayMode.LOOP);
+		
+		// MIRROR 
+		texture = new Texture("chars/stacy/stacy_mirror.png");
+		texture.setFilter(TextureFilter.Linear, TextureFilter.Nearest);
+		frames = new TextureRegion(texture).split(36, 39)[0];
+		mirror = new TextureRegion(texture).split(36, 39)[0];
+		for(TextureRegion m : mirror) {
+			m.flip(true, false);
+		}
+		mirrorR = new Animation(0.07f, frames);
+		mirrorR.setPlayMode(PlayMode.NORMAL);
+		mirrorL = new Animation(0.07f, mirror);
+		mirrorL.setPlayMode(PlayMode.NORMAL);	
 		
 		currentAnimation = idleAnimationR;
+		
 		setBounds(0, 0, 32, 39);
 		setSize(32, 39);
 		
@@ -198,6 +224,11 @@ public class Stacy extends BaseActor {
 	    	state = State.IDLE;
 	    }
 	    
+	    if (state == State.HURT && shield != null) {
+	    	shield.getBody().setUserData("destroy");
+			shield = null;
+	    }
+	    
 	    // Jump
 //	    body.setLinearVelocity(body.getLinearVelocity().x, body.getLinearVelocity().y * 0.9f);
 	    if (body.getLinearVelocity().y != 0 && state != State.HURT) {
@@ -206,12 +237,59 @@ public class Stacy extends BaseActor {
 	    
 		// debug position
 //		System.out.println((getX() + getWidth() / 2f) + ", " + (getY() + getHeight() / 2f));
+	    selectedShield = Shield.MIRROR;
 	}
 	
 	private void handleInput(float delta) {
 		
-		if (state != State.HURT) {
+		if (state != State.HURT && state != State.JUMP) {
+			if (Gdx.input.isKeyJustPressed(Input.Keys.Z)) {
+				state = State.SHIELD;
+				timePassed = 0;
+				switch (selectedShield) {
+				case MIRROR:
+					currentAnimation = facingRight ? mirrorR : mirrorL;
+					shield = new MagicMikeMirror(body.getWorld());
+					shield.getBody().setTransform(body.getTransform().getPosition().x + (facingRight?20:-20) / Constants.PPM, body.getTransform().getPosition().y, 0);
+					((MagicMikeMirror) shield).resetTime();
+					if (facingRight) ((MagicMikeMirror) shield).faceRight(); else ((MagicMikeMirror) shield).faceLeft();
+					break;
+				default:
+					break;
+				}
+			}
+			
+			if (Gdx.input.isKeyPressed(Input.Keys.Z) && shield != null) {
+				state = State.SHIELD;
+				switch (selectedShield) {
+				case MIRROR:
+					break;
+				default:
+					break;
+				}
+			}
+			
+			if (!Gdx.input.isKeyPressed(Input.Keys.Z) && state == State.SHIELD && shield != null) {
+				shield.getBody().setUserData("destroy");
+				shield = null;
+				state = State.IDLE;
+			}
+		}
 		
+		if (state == State.SHIELD) {
+			if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+				faceLeft();
+			} else if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
+				faceRight();
+			}
+			
+			currentAnimation = facingRight ? mirrorR : mirrorL;
+			shield.getBody().setTransform(body.getTransform().getPosition().x + (facingRight?20:-20) / Constants.PPM, body.getTransform().getPosition().y, 0);
+			if (facingRight) ((MagicMikeMirror) shield).faceRight(); else ((MagicMikeMirror) shield).faceLeft();
+		}
+		
+		if (state != State.HURT && state != State.SHIELD) {
+			
 			if (!Gdx.input.isKeyPressed(Input.Keys.LEFT) && !Gdx.input.isKeyPressed(Input.Keys.RIGHT) && state != State.JUMP) {
 				state = State.IDLE;
 				currentAnimation = facingRight ? idleAnimationR : idleAnimationL;
@@ -282,11 +360,13 @@ public class Stacy extends BaseActor {
 	public void act(float delta) {
 		super.act(delta);
 	    timePassed += delta;
+	    if (shield != null) shield.act(delta);
 	}
 	
 	@Override
 	public void draw(Batch batch, float parentAlpha){
 	    TextureRegion currentFrame = currentAnimation.getKeyFrame(timePassed);
+	    if (shield != null) shield.draw(batch, parentAlpha);
 	    batch.draw(currentFrame, getX(), getY(), getWidth(), getHeight());
 	}
 	
@@ -374,6 +454,9 @@ public class Stacy extends BaseActor {
 		startRunAnimationL.getKeyFrames()[0].getTexture().dispose();
 		runAnimationL.getKeyFrames()[0].getTexture().dispose();
 		hurtL.getKeyFrames()[0].getTexture().dispose();
+		jumpL.getKeyFrames()[0].getTexture().dispose();
+		fallL.getKeyFrames()[0].getTexture().dispose();
+		mirrorL.getKeyFrames()[0].getTexture().dispose();
 	}
 
 	public void setJumping(boolean isJumping) {

@@ -16,7 +16,7 @@ public class Bullet extends BaseActor {
 
 	private TextureRegion tex;
 	private Vector2 direction;
-	private float speed;
+	private float force;
 	private float lifeTime;
 	
 	public Bullet(float x, float y, BaseActor target, World world) {
@@ -27,7 +27,7 @@ public class Bullet extends BaseActor {
 		setPosition(x, y);
 		
 		direction = new Vector2(target.getX(Align.center) - x, target.getY(Align.center) - y).nor();
-		speed = 70;
+		force = 90;
 		lifeTime = 0;
 		createPhysics(world);
 	}
@@ -63,14 +63,13 @@ public class Bullet extends BaseActor {
 		// Main Fixture
 		FixtureDef fdef = new FixtureDef();
 		fdef.shape = shape;
-		fdef.restitution = 1;
+		fdef.friction = 0;
 		fdef.filter.categoryBits = Constants.BIT_ENEMY;
-		fdef.filter.maskBits = (short) (Constants.BIT_OBSTACLE | Constants.BIT_PLAYER);
+		fdef.filter.maskBits = (short) (Constants.BIT_OBSTACLE | Constants.BIT_PLAYER | Constants.BIT_SHIELD);
 		fixture = body.createFixture(fdef);
 		fixture.setUserData(this);
 		shape.dispose();
-		
-		body.applyForceToCenter(direction.scl(speed), true);
+		body.applyForceToCenter(direction.scl(force), true);
 	}
 	
 	public int knockbackForce() {

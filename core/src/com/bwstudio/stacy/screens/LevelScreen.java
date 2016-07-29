@@ -366,7 +366,7 @@ public class LevelScreen extends BaseScreen {
 					Constants.BIT_ENEMY :
 					Constants.BIT_ENEMY | Constants.BIT_PLAYER);
 
-			if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+			if (Gdx.input.isKeyPressed(Input.Keys.DOWN) && stacy.getState() != Stacy.State.SHIELD) {
 				filterData.maskBits = Constants.BIT_ENEMY;
 			}
 			
@@ -388,7 +388,6 @@ public class LevelScreen extends BaseScreen {
 		
 		if (shake > 0) shake -= delta;
 		if (shake < 0.5f) shake = 0;
-		System.out.println(shake);
 		
 		// Debug player position
 		position.setText(String.format("X: %.1f Y: %.1f", stacy.getX() + stacy.getWidth() / 2f, stacy.getY() + stacy.getHeight() / 2f));

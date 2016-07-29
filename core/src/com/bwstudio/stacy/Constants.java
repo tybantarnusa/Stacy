@@ -19,7 +19,6 @@ public class Constants {
 	public static short BIT_PLAYER = 0b00000010;
 	public static short BIT_OWP = 0b00000100;
 	public static short BIT_ENEMY = 0b00001000;
-	public static short BIT_BULLET_ENEMY = 0b00010000;
-	public static short BIT_BULLET_PLAYER = 0b00100000;
+	public static short BIT_SHIELD = 0b00010000;
 	
 }
