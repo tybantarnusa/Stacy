@@ -73,7 +73,7 @@ public class Bullet extends BaseActor {
 		FixtureDef fdef = new FixtureDef();
 		fdef.shape = shape;
 		fdef.friction = 0;
-		fdef.filter.categoryBits = Constants.BIT_ENEMY;
+		fdef.filter.categoryBits = Constants.BIT_BULLET;
 		fdef.filter.maskBits = (short) (Constants.BIT_OBSTACLE | Constants.BIT_PLAYER | Constants.BIT_SHIELD);
 		fixture = body.createFixture(fdef);
 		fixture.setUserData(this);

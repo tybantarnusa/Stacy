@@ -1,13 +1,16 @@
 package com.bwstudio.stacy;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.bwstudio.stacy.actors.Bullet;
 import com.bwstudio.stacy.actors.Enemy;
 import com.bwstudio.stacy.actors.Enemy1;
+import com.bwstudio.stacy.actors.MagicMikeMirror;
 import com.bwstudio.stacy.actors.Stacy;
 import com.bwstudio.stacy.actors.Warp;
 
@@ -78,6 +81,7 @@ public class MyContactListener implements ContactListener {
 			s.giveDamage(0, s.isFacingRight() ? -50 : 50);
 		}
 		
+		// Enemy sight
 		if (a.getUserData() instanceof Stacy &&
 			b.getUserData().equals("enemy1 sight")) {
 			Enemy1 e = ((Enemy1) b.getBody().getFixtureList().get(0).getUserData());
@@ -90,6 +94,7 @@ public class MyContactListener implements ContactListener {
 			e.attack((Stacy) b.getUserData());
 		}
 		
+		// Player hit
 		if (a.getUserData() instanceof Stacy &&
 			b.getUserData() instanceof Bullet) {
 			Stacy s = (Stacy) a.getUserData();
@@ -106,6 +111,7 @@ public class MyContactListener implements ContactListener {
 			p.destroy();
 		}
 		
+		// Bullet hit obstacle
 		if (a.getFilterData().categoryBits == Constants.BIT_OBSTACLE &&
 			b.getUserData() instanceof Bullet) {
 			Bullet p = (Bullet) b.getUserData();
@@ -116,6 +122,41 @@ public class MyContactListener implements ContactListener {
 			a.getUserData() instanceof Bullet) {
 			Bullet p = (Bullet) b.getUserData();
 			p.destroy();
+		}
+
+		
+		// Bullet Reflect
+		if (a.getUserData() instanceof Bullet &&
+			b.getUserData() instanceof MagicMikeMirror) {
+			Filter filter = a.getFilterData();
+			filter.maskBits = (short) (a.getFilterData().maskBits | Constants.BIT_ENEMY);
+			a.setFilterData(filter);
+		}
+		
+		if (b.getUserData() instanceof Bullet &&
+			a.getUserData() instanceof MagicMikeMirror) {
+			Filter filter = b.getFilterData();
+			filter.maskBits = (short) (b.getFilterData().maskBits | Constants.BIT_ENEMY);
+			b.setFilterData(filter);
+		}
+		
+		// Enemy Hit
+		if (a.getUserData() instanceof Bullet &&
+			b.getUserData() instanceof Enemy) {
+			Enemy e = ((Enemy) b.getUserData());
+			Bullet bu = ((Bullet) a.getUserData());
+			e.giveDamage(0, a.getBody().getLinearVelocity().x > 0 ? 30 : -30);
+			a.getBody().setLinearVelocity(Vector2.Zero);
+			bu.destroy();
+		}
+		
+		if (b.getUserData() instanceof Bullet &&
+			a.getUserData() instanceof Enemy) {
+			Enemy e = ((Enemy) a.getUserData());
+			Bullet bu = ((Bullet) b.getUserData());
+			e.giveDamage(0, b.getBody().getLinearVelocity().x > 0 ? 30 : -30);
+			b.getBody().setLinearVelocity(Vector2.Zero);
+			bu.destroy();
 		}
 	}
 
@@ -140,16 +181,19 @@ public class MyContactListener implements ContactListener {
 			if (s.getState() != Stacy.State.HURT) s.setOffGround();
 		}
 		
+		// Enemy sight
 		if (a.getUserData() instanceof Stacy &&
 			b.getUserData().equals("enemy1 sight")) {
 			Enemy1 e = ((Enemy1) b.getBody().getFixtureList().get(0).getUserData());
 			e.setState(Enemy1.State.STAY_STILL);
+			e.removeTarget();
 		}
 		
 		if (b.getUserData() instanceof Stacy &&
 			a.getUserData().equals("enemy1 sight")) {
 			Enemy1 e = ((Enemy1) a.getBody().getFixtureList().get(0).getUserData());
 			e.setState(Enemy1.State.STAY_STILL);
+			e.removeTarget();
 		}
 	}
 

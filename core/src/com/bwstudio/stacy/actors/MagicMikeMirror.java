@@ -75,7 +75,7 @@ public class MagicMikeMirror extends ShieldEntity {
 		fdef.restitution = 1;
 		fdef.friction = 0;
 		fdef.filter.categoryBits = Constants.BIT_SHIELD;
-		fdef.filter.maskBits = Constants.BIT_ENEMY;
+		fdef.filter.maskBits = (short) (Constants.BIT_BULLET | Constants.BIT_ENEMY);
 		fixture = body.createFixture(fdef);
 		fixture.setUserData(this);
 	}

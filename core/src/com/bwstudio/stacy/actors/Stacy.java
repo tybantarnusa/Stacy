@@ -385,7 +385,7 @@ public class Stacy extends BaseActor {
 		fdef.density = 0f;
 		fdef.friction = 0.2f;
 		fdef.filter.categoryBits = Constants.BIT_PLAYER;
-		fdef.filter.maskBits = (short) (Constants.BIT_OBSTACLE | Constants.BIT_OWP | Constants.BIT_ENEMY);
+		fdef.filter.maskBits = (short) (Constants.BIT_OBSTACLE | Constants.BIT_OWP | Constants.BIT_ENEMY | Constants.BIT_BULLET);
 		fixture = body.createFixture(fdef);
 		fixture.setUserData(this);
 		

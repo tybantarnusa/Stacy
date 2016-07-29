@@ -15,6 +15,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.bwstudio.stacy.Constants;
+import com.bwstudio.stacy.screens.LevelScreen;
 
 public class Enemy1 extends BaseActor implements Enemy {
 
@@ -28,6 +29,8 @@ public class Enemy1 extends BaseActor implements Enemy {
 	private Animation walkingR;
 	private Animation attackL;
 	private Animation attackR;
+	private Animation hurtL;
+	private Animation hurtR;
 	private Animation currentAnimation;
 	
 	private Array<Bullet> bullets;
@@ -39,6 +42,7 @@ public class Enemy1 extends BaseActor implements Enemy {
 		WALK_LEFT,
 		WALK_RIGHT,
 		STAY_STILL,
+		HURT,
 		ATTACKING
 	}
 	
@@ -46,8 +50,12 @@ public class Enemy1 extends BaseActor implements Enemy {
 		timePassed = 0;
 		Texture texture = new Texture("chars/enemies/tomcruise.png");
 		texture.setFilter(TextureFilter.Linear, TextureFilter.Nearest);
-		TextureRegion[] frames = new TextureRegion(texture).split(36, 40)[0];
-		TextureRegion[] mirror = new TextureRegion(texture).split(36, 40)[0];
+		TextureRegion[][] tex = new TextureRegion(texture).split(36, 40);
+		TextureRegion[][] texMirror = new TextureRegion(texture).split(36, 40);
+		
+		// Patrol
+		TextureRegion[] frames = tex[0];
+		TextureRegion[] mirror = texMirror[0];
 		for(TextureRegion m : mirror) {
 			m.flip(true, false);
 		}
@@ -56,8 +64,9 @@ public class Enemy1 extends BaseActor implements Enemy {
 		walkingR = new Animation(75f/1000f, mirror);
 		walkingR.setPlayMode(PlayMode.LOOP);
 		
-		frames = new TextureRegion(texture).split(36, 40)[1];
-		mirror = new TextureRegion(texture).split(36, 40)[1];
+		// Attack
+		frames = tex[1];
+		mirror = texMirror[1];
 		for(TextureRegion m : mirror) {
 			m.flip(true, false);
 		}
@@ -66,6 +75,27 @@ public class Enemy1 extends BaseActor implements Enemy {
 		attackR = new Animation(75f/1000f, mirror);
 		attackR.setPlayMode(PlayMode.NORMAL);
 		
+		// Hurt
+		frames = new TextureRegion[] {
+			tex[2][0],
+			tex[2][1],
+			tex[2][2],
+			tex[2][3]
+		};
+		mirror = new TextureRegion[] {
+			texMirror[2][0],
+			texMirror[2][1],
+			texMirror[2][2],
+			texMirror[2][3]
+		};
+		for(TextureRegion m : mirror) {
+			m.flip(true, false);
+		}
+		hurtL = new Animation(75f/1000f, frames);
+		hurtL.setPlayMode(PlayMode.NORMAL);
+		hurtR = new Animation(75f/1000f, mirror);
+		hurtR.setPlayMode(PlayMode.NORMAL);
+				
 		currentAnimation = walkingL;
 		state = State.WALK_LEFT;
 		facingRight = false;
@@ -94,6 +124,11 @@ public class Enemy1 extends BaseActor implements Enemy {
 	public void act(float delta) {
 		super.act(delta);
 		timePassed += delta;
+		
+		if (target != null && state == State.STAY_STILL) {
+			state = State.ATTACKING;
+		}
+		
 		for (Bullet bullet : bullets) {
 			if (bullet.getBody() == null) toBeRemoved.add(bullet);
 	    	bullet.act(delta);
@@ -126,6 +161,10 @@ public class Enemy1 extends BaseActor implements Enemy {
 			stateTimer += delta;
 			if (stateTimer > 1) {
 				setState(!facingRight ? State.WALK_LEFT : State.WALK_RIGHT);
+			}
+		} else if (state == State.HURT) {
+			if (currentAnimation.isAnimationFinished(timePassed)) {
+				setState(State.STAY_STILL);
 			}
 		} else {
 			stateTimer += delta;
@@ -167,7 +206,7 @@ public class Enemy1 extends BaseActor implements Enemy {
 		fdef.density = 0f;
 		fdef.friction = 0.2f;
 		fdef.filter.categoryBits = Constants.BIT_ENEMY;
-		fdef.filter.maskBits = (short) (Constants.BIT_OBSTACLE | Constants.BIT_OWP | Constants.BIT_PLAYER);
+		fdef.filter.maskBits = (short) (Constants.BIT_OBSTACLE | Constants.BIT_OWP | Constants.BIT_PLAYER | Constants.BIT_BULLET);
 		fixture = body.createFixture(fdef);
 		fixture.setUserData(this);
 		shape.dispose();
@@ -191,11 +230,28 @@ public class Enemy1 extends BaseActor implements Enemy {
 		this.state = state;
 	}
 	
+	public void removeTarget() {
+		target = null;
+	}
+	
 	public State getState() { return state; }
 
 	@Override
 	public void dispose() {
 		walkingL.getKeyFrames()[0].getTexture().dispose();
+	}
+
+	@Override
+	public void giveDamage(int amount, float knockback) {
+		setState(State.HURT);
+		currentAnimation = facingRight ? hurtR : hurtL;
+		timePassed = stateTimer = 0;
+		
+		if (knockback < 0) facingRight = true; else facingRight = false;
+		
+		body.setLinearVelocity(0, 0);
+		body.applyForceToCenter(knockback, Math.abs(knockback) * 1.5f, true);
+		LevelScreen.shake = 1f;
 	}
 
 }
