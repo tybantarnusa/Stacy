@@ -21,9 +21,13 @@ public class Enemy1 extends BaseActor implements Enemy {
 	private State state;
 	private float stateTimer;
 	
+	private boolean facingRight;
+	
 	private float timePassed;
 	private Animation walkingL;
 	private Animation walkingR;
+	private Animation attackL;
+	private Animation attackR;
 	private Animation currentAnimation;
 	
 	private Array<Bullet> bullets;
@@ -47,12 +51,24 @@ public class Enemy1 extends BaseActor implements Enemy {
 		for(TextureRegion m : mirror) {
 			m.flip(true, false);
 		}
-		walkingL = new Animation(0.2f, frames);
+		walkingL = new Animation(75f/1000f, frames);
 		walkingL.setPlayMode(PlayMode.LOOP);
-		walkingR = new Animation(0.2f, mirror);
+		walkingR = new Animation(75f/1000f, mirror);
 		walkingR.setPlayMode(PlayMode.LOOP);
+		
+		frames = new TextureRegion(texture).split(36, 40)[1];
+		mirror = new TextureRegion(texture).split(36, 40)[1];
+		for(TextureRegion m : mirror) {
+			m.flip(true, false);
+		}
+		attackL = new Animation(75f/1000f, frames);
+		attackL.setPlayMode(PlayMode.NORMAL);
+		attackR = new Animation(75f/1000f, mirror);
+		attackR.setPlayMode(PlayMode.NORMAL);
+		
 		currentAnimation = walkingL;
 		state = State.WALK_LEFT;
+		facingRight = false;
 		stateTimer = 0;
 		
 		bullets = new Array<Bullet>();
@@ -68,10 +84,10 @@ public class Enemy1 extends BaseActor implements Enemy {
 	@Override
 	public void draw(Batch batch, float parentAlpha){
 	    TextureRegion currentFrame = currentAnimation.getKeyFrame(timePassed);
+	    batch.draw(currentFrame, getX(), getY(), getWidth(), getHeight());
 	    for (Bullet bullet : bullets) {
 	    	bullet.draw(batch, parentAlpha);
 	    }
-	    batch.draw(currentFrame, getX(), getY(), getWidth(), getHeight());
 	}
 	
 	@Override
@@ -91,6 +107,7 @@ public class Enemy1 extends BaseActor implements Enemy {
 		// Move
 		setPosition(body.getPosition().x * Constants.PPM - getWidth() / 2f, body.getPosition().y * Constants.PPM - getHeight() / 2f);
 		if (state == State.WALK_LEFT) {
+			facingRight = false;
 			stateTimer += delta;
 			body.setTransform(body.getTransform().getPosition().x - 0.2f / Constants.PPM, body.getTransform().getPosition().y, 0);
 			body.setAwake(true);
@@ -98,6 +115,7 @@ public class Enemy1 extends BaseActor implements Enemy {
 				setState(State.WALK_RIGHT);
 			}
 		} else if (state == State.WALK_RIGHT) {
+			facingRight = true;
 			stateTimer += delta;
 			body.setTransform(body.getTransform().getPosition().x + 0.2f / Constants.PPM, body.getTransform().getPosition().y, 0);
 			body.setAwake(true);
@@ -107,16 +125,19 @@ public class Enemy1 extends BaseActor implements Enemy {
 		} else if (state == State.STAY_STILL) {
 			stateTimer += delta;
 			if (stateTimer > 1) {
-				setState(currentAnimation == walkingL ? State.WALK_LEFT : State.WALK_RIGHT);
+				setState(!facingRight ? State.WALK_LEFT : State.WALK_RIGHT);
 			}
 		} else {
 			stateTimer += delta;
 			if (target.getBody().getPosition().x < body.getPosition().x) {
-				currentAnimation = walkingL;
+				currentAnimation = attackL;
+				facingRight = false;
 			} else {
-				currentAnimation = walkingR;
+				currentAnimation = attackR;
+				facingRight = true;
 			}
 			if (stateTimer > 1.5f) {
+				timePassed = 0;
 				bullets.add(new Bullet(getX(Align.center), getY(Align.center), target, body.getWorld()));
 				stateTimer = 0;
 			}

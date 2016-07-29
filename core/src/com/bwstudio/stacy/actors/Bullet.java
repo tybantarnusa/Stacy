@@ -35,7 +35,7 @@ public class Bullet extends BaseActor {
 		Texture texture = new Texture("things/bulletfire.png");
 		texture.setFilter(TextureFilter.Linear, TextureFilter.Nearest);
 		TextureRegion[] frames = new TextureRegion(texture).split(22, 22)[0];
-		animation = new Animation(0.2f, frames);
+		animation = new Animation(75f/1000f, frames);
 		animation.setPlayMode(PlayMode.LOOP);
 		
 		createPhysics(world);
